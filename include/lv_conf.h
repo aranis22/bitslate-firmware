@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LV_CONF_H
+#define LV_CONF_H
 
 #define LV_COLOR_DEPTH 16
 #define LV_USE_LOG 1
@@ -28,3 +29,5 @@
 #define LV_USE_TEXTAREA 1
 #define LV_USE_KEYBOARD 1
 #define LV_USE_CANVAS 1
+
+#endif // LV_CONF_H
