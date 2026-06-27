@@ -14,6 +14,9 @@ static constexpr uint32_t DRAW_BUF_PIXELS = SCREEN_W * DRAW_BUF_LINES;
 static lv_color_t drawBuf1[DRAW_BUF_PIXELS];
 static lv_color_t drawBuf2[DRAW_BUF_PIXELS];
 
+static lv_obj_t* buttonLabel = nullptr;
+static lv_obj_t* statusLabel = nullptr;
+
 static void lvglFlush(lv_display_t* disp, const lv_area_t* area, uint8_t* px_map) {
   uint32_t w = area->x2 - area->x1 + 1;
   uint32_t h = area->y2 - area->y1 + 1;
@@ -41,6 +44,21 @@ static void lvglTouchRead(lv_indev_t* indev, lv_indev_data_t* data) {
   }
 }
 
+static void buttonEventCallback(lv_event_t* event) {
+  if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
+    return;
+  }
+
+  if (buttonLabel != nullptr) {
+    lv_label_set_text(buttonLabel, "Touched!");
+  }
+
+  if (statusLabel != nullptr) {
+    lv_label_set_text(statusLabel, "Touch OK");
+    lv_obj_set_style_text_color(statusLabel, lv_color_hex(0x00FF66), 0);
+  }
+}
+
 static void createTestScreen() {
   lv_obj_t* screen = lv_obj_create(nullptr);
   lv_scr_load(screen);
@@ -62,10 +80,17 @@ static void createTestScreen() {
   lv_obj_t* btn = lv_button_create(screen);
   lv_obj_set_size(btn, 180, 70);
   lv_obj_align(btn, LV_ALIGN_CENTER, 0, 30);
+  lv_obj_add_event_cb(btn, buttonEventCallback, LV_EVENT_CLICKED, nullptr);
 
-  lv_obj_t* label = lv_label_create(btn);
-  lv_label_set_text(label, "Touch me");
-  lv_obj_center(label);
+  buttonLabel = lv_label_create(btn);
+  lv_label_set_text(buttonLabel, "Touch me");
+  lv_obj_center(buttonLabel);
+
+  statusLabel = lv_label_create(screen);
+  lv_label_set_text(statusLabel, "Waiting for touch");
+  lv_obj_set_style_text_color(statusLabel, lv_color_hex(0xB8C7D9), 0);
+  lv_obj_set_style_text_font(statusLabel, &lv_font_montserrat_18, 0);
+  lv_obj_align(statusLabel, LV_ALIGN_BOTTOM_MID, 0, -25);
 }
 
 void setup() {
