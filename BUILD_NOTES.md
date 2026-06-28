@@ -26,3 +26,10 @@
 - Current limitation: cannot drag wire directly from the left tray as expected.
 - Frozen for now.
 - Next direction is PhET/source research and desktop prototype workflow before continuing embedded simulation logic.
+
+## 2026-06-28 PhET Research Workflow
+
+- PhET reference repositories were cloned into ignored `research/phet-reference/`.
+- BitSlate research notes live in `research/phet-notes/`.
+- Complex STEM simulation workflow is now desktop prototype first, then pure logic, then C++ port, then LVGL integration.
+- Circuit Lab should continue from a small desktop model before returning to embedded UI details.
