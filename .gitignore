@@ -8,4 +8,6 @@ Thumbs.db
 *.bin
 *.elf
 *.map
+__pycache__/
+*.py[cod]
 research/phet-reference/
