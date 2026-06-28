@@ -33,3 +33,18 @@
 - BitSlate research notes live in `research/phet-notes/`.
 - Complex STEM simulation workflow is now desktop prototype first, then pure logic, then C++ port, then LVGL integration.
 - Circuit Lab should continue from a small desktop model before returning to embedded UI details.
+
+## 2026-06-28 Desktop Circuit Lab Prototype
+
+- Started a Python/pygame desktop prototype for BitSlate Circuit Lab.
+- Prototype is intentionally separate from embedded LVGL firmware.
+- Initial model uses components, terminals, wires, and simplified graph/path closed-loop detection.
+- First goal is battery + bulb + wire logic before any C++ or LVGL integration.
+
+## 2026-06-28 Circuit Lab Portable Core
+
+- Desktop prototype worked visually with battery, bulb, wires, closed-loop detection, and bulb ON state.
+- Python model was refactored into a portable shape using component types, terminals, wires, and graph/path logic.
+- C++ portable core was created in `portable-core/circuit-lab/`.
+- C++ core mirrors the Python graph/path logic.
+- Embedded LVGL integration is next, but not done in this checkpoint.
