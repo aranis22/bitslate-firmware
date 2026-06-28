@@ -20,6 +20,13 @@ python desktop-prototypes/circuit-lab-python/main.py
 - Drag placed components.
 - Detect a simple closed circuit path.
 - Show bulb OFF/ON state visually.
+- Python model shaped to match the portable C++ core.
+
+## Portable Core
+
+The matching C++ core lives in `portable-core/circuit-lab/`.
+
+Embedded integration comes later. The current Python prototype remains the fast desktop test bench for interaction and model behavior.
 
 ## Future Port Path
 

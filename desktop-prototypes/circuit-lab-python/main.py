@@ -4,7 +4,7 @@ import sys
 
 import pygame
 
-from circuit_model import CircuitModel
+from circuit_model import CircuitModel, ComponentType
 
 
 WIDTH = 480
@@ -189,9 +189,9 @@ class CircuitLabApp:
     def draw_components(self) -> None:
         lit_bulbs = self.model.lit_bulb_ids()
         for component in self.model.components:
-            if component.type == "battery":
+            if component.type == ComponentType.BATTERY:
                 self.draw_battery(component)
-            elif component.type == "bulb":
+            elif component.type == ComponentType.BULB:
                 self.draw_bulb(component, component.id in lit_bulbs)
 
             for terminal in component.terminals:

@@ -12,6 +12,18 @@ The bulb turns on when there is a path from a battery positive terminal to a bat
 
 This is intentionally educational v0 logic, not a full electrical solver.
 
+## Portable Model Shape
+
+The Python model now uses the same core concepts as the C++ portable version:
+
+- `ComponentType`
+- `Terminal`
+- `Component`
+- `Wire`
+- `CircuitModel`
+
+The C++ core lives in `portable-core/circuit-lab/`. Embedded integration comes later after the core stays stable.
+
 ## Intentionally Not Implemented Yet
 
 - Resistors
