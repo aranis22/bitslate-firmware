@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
+#include "apps/stem/CircuitLabApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -13,9 +14,6 @@ static constexpr uint32_t DRAW_BUF_PIXELS = SCREEN_W * DRAW_BUF_LINES;
 
 static lv_color_t drawBuf1[DRAW_BUF_PIXELS];
 static lv_color_t drawBuf2[DRAW_BUF_PIXELS];
-
-static lv_obj_t* buttonLabel = nullptr;
-static lv_obj_t* statusLabel = nullptr;
 
 static void lvglFlush(lv_display_t* disp, const lv_area_t* area, uint8_t* px_map) {
   uint32_t w = area->x2 - area->x1 + 1;
@@ -44,60 +42,11 @@ static void lvglTouchRead(lv_indev_t* indev, lv_indev_data_t* data) {
   }
 }
 
-static void buttonEventCallback(lv_event_t* event) {
-  if (lv_event_get_code(event) != LV_EVENT_CLICKED) {
-    return;
-  }
-
-  if (buttonLabel != nullptr) {
-    lv_label_set_text(buttonLabel, "Touched!");
-  }
-
-  if (statusLabel != nullptr) {
-    lv_label_set_text(statusLabel, "Touch OK");
-    lv_obj_set_style_text_color(statusLabel, lv_color_hex(0x00FF66), 0);
-  }
-}
-
-static void createTestScreen() {
-  lv_obj_t* screen = lv_obj_create(nullptr);
-  lv_scr_load(screen);
-
-  lv_obj_set_style_bg_color(screen, lv_color_hex(0x101820), 0);
-
-  lv_obj_t* title = lv_label_create(screen);
-  lv_label_set_text(title, "BitSlate");
-  lv_obj_set_style_text_color(title, lv_color_hex(0xFFFFFF), 0);
-  lv_obj_set_style_text_font(title, &lv_font_montserrat_28, 0);
-  lv_obj_align(title, LV_ALIGN_TOP_MID, 0, 25);
-
-  lv_obj_t* subtitle = lv_label_create(screen);
-  lv_label_set_text(subtitle, "LVGL + LovyanGFX OK");
-  lv_obj_set_style_text_color(subtitle, lv_color_hex(0x00FFAA), 0);
-  lv_obj_set_style_text_font(subtitle, &lv_font_montserrat_18, 0);
-  lv_obj_align(subtitle, LV_ALIGN_TOP_MID, 0, 70);
-
-  lv_obj_t* btn = lv_button_create(screen);
-  lv_obj_set_size(btn, 180, 70);
-  lv_obj_align(btn, LV_ALIGN_CENTER, 0, 30);
-  lv_obj_add_event_cb(btn, buttonEventCallback, LV_EVENT_CLICKED, nullptr);
-
-  buttonLabel = lv_label_create(btn);
-  lv_label_set_text(buttonLabel, "Touch me");
-  lv_obj_center(buttonLabel);
-
-  statusLabel = lv_label_create(screen);
-  lv_label_set_text(statusLabel, "Waiting for touch");
-  lv_obj_set_style_text_color(statusLabel, lv_color_hex(0xB8C7D9), 0);
-  lv_obj_set_style_text_font(statusLabel, &lv_font_montserrat_18, 0);
-  lv_obj_align(statusLabel, LV_ALIGN_BOTTOM_MID, 0, -25);
-}
-
 void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate LVGL bring-up test");
+  Serial.println("BitSlate Circuit Lab wire prototype");
   Serial.println("before display.init");
 
   display.init();
@@ -121,9 +70,9 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  createTestScreen();
+  CircuitLabApp::create();
 
-  Serial.println("LVGL screen created");
+  Serial.println("Circuit Lab screen created");
 }
 
 void loop() {

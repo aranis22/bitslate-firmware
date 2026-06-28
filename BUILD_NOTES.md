@@ -17,3 +17,12 @@
 - LVGL display flush works.
 - Next step: build the real BitSlate home screen / launcher UI.
 - Do not change verified display pins.
+
+## 2026-06-27 Circuit Lab Early Prototype
+
+- Simple Circuit Lab / STEM app screen exists.
+- Wire placement is partially working.
+- Wire placement behavior is weird but interesting.
+- Current limitation: cannot drag wire directly from the left tray as expected.
+- Frozen for now.
+- Next direction is PhET/source research and desktop prototype workflow before continuing embedded simulation logic.
