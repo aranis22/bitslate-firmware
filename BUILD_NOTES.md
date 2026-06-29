@@ -63,3 +63,10 @@
 - Built simplified 1D Python prototype with two balls, mass/velocity sliders, play/pause/reset, elastic collision, wall bounce, momentum, and kinetic energy.
 - Added plain Python model tests.
 - Embedded Collision Lab port is not started yet.
+
+## 2026-06-29 Collision Lab Portable Core
+
+- Python Collision Lab prototype worked visually.
+- C++ portable core was created in `portable-core/collision-lab/`.
+- C++ core mirrors the 1D elastic collision model from the Python prototype.
+- Embedded LVGL integration is not started yet.

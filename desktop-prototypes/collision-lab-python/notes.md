@@ -29,5 +29,6 @@ The first model uses two balls on a horizontal line. Each frame updates position
 ## Next Steps
 
 - Refine the desktop model if the feel is off.
-- Extract a small portable C++ model.
+- Keep the Python prototype as the visual sandbox.
+- Use the matching C++ portable core in `portable-core/collision-lab/` as the future embedded logic source.
 - Add a simple embedded LVGL Collision Lab after the core is stable.
