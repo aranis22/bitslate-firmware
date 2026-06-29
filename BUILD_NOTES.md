@@ -100,3 +100,26 @@
 - Spring/mass animation moves while Play is pressed.
 - Build/upload worked on ESP32-S3.
 - Next STEM app research target is Build an Atom.
+
+## 2026-06-29 Build an Atom Research Start
+
+- Masses & Springs embedded v0 was checkpointed.
+- Build an Atom research started on `build-atom-research`.
+- PhET Build an Atom reference repo was cloned into ignored `research/phet-reference/` and inspected.
+- Desktop prototype scaffold created in `desktop-prototypes/build-atom-python/`.
+- Implementation is not started yet beyond a small model scaffold.
+
+## 2026-06-29 Build an Atom Portable Core
+
+- Build an Atom Python desktop prototype works visually.
+- Portable C++ core created in `portable-core/build-atom/`.
+- C++ core tracks protons, neutrons, electrons, atomic number, mass number, charge, neutrality, and first-10-element lookup.
+- C++ core has assert tests for empty atom, H, He, Li ion, electron shell capacity, and reset.
+- Embedded LVGL integration is not started yet.
+
+## 2026-06-29 Build an Atom Desktop Prototype Update
+
+- Desktop pygame prototype has clickable Proton, Neutron, Electron, and Reset tray buttons.
+- Tray buttons show matching colored particle icons.
+- Center atom area shows nucleus, shell 1, shell 2, particle counts, and readouts.
+- Embedded LVGL integration is starting next on a separate branch.
