@@ -76,6 +76,56 @@ Status:
 Expected app entry:
 `MassesSpringsApp::create()`
 
+### Build an Atom v0
+
+Status:
+
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working
+- Features:
+  - proton count
+  - neutron count
+  - electron count
+  - element identity
+  - atomic number
+  - mass number
+  - charge
+  - right-side element card
+- Current limitations:
+  - no drag mode
+  - no game/challenge mode
+  - no BitSlate OS launcher integration yet
+
+Expected app entry:
+`BuildAtomApp::create()`
+
+### Periodic Table
+
+Status:
+
+- Research/planning started
+- Python prototype not implemented yet
+- C++ core not implemented yet
+- Embedded LVGL not implemented yet
+
+Planned features:
+
+- 480x320 landscape layout
+- left info panel
+- compressed periodic table grid
+- tap/click an element to update details
+- top six fields:
+  - atomic mass
+  - category / series
+  - group / period
+  - electron shells
+  - state at room temp
+  - electronegativity
+
+Expected app entry:
+`PeriodicTableApp::create()`
+
 ## Future OS launcher rule
 
 For now, `main.cpp` can temporarily call one app directly.
@@ -87,6 +137,7 @@ Later, BitSlate OS should expose a launcher menu:
   - Collision Lab
   - Masses & Springs
   - Build an Atom
+  - Periodic Table
 - Coding
 - Drawing
 - Lessons
