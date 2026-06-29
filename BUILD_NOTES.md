@@ -100,3 +100,11 @@
 - Spring/mass animation moves while Play is pressed.
 - Build/upload worked on ESP32-S3.
 - Next STEM app research target is Build an Atom.
+
+## 2026-06-29 Build an Atom Research Start
+
+- Masses & Springs embedded v0 was checkpointed.
+- Build an Atom research started on `build-atom-research`.
+- PhET Build an Atom reference repo was cloned into ignored `research/phet-reference/` and inspected.
+- Desktop prototype scaffold created in `desktop-prototypes/build-atom-python/`.
+- Implementation is not started yet beyond a small model scaffold.
