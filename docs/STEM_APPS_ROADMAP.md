@@ -64,16 +64,49 @@ Status:
   - No ruler/tooling
   - No BitSlate OS launcher integration yet
 
-## Next app: Build an Atom
+### Build an Atom v0
+
+Status:
+
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working/checkpointed
+- Current features:
+  - Proton, neutron, and electron counts
+  - Simple element identity
+  - Atomic number, mass number, and charge readouts
+  - Nucleus and electron shell workspace
+  - Reset
+- Known limitations:
+  - No drag mode
+  - No game/challenge mode
+  - No BitSlate OS launcher integration yet
+
+## Next app: Periodic Table
+
+Status:
+
+- Research/planning started
+- Python prototype not implemented yet
+- C++ core not implemented yet
+- Embedded LVGL not implemented yet
 
 Goal:
 
-- Desktop prototype first
-- Proton, neutron, and electron counts
-- Simple element identity
-- Atomic number, mass number, and charge readouts
-- Nucleus and electron shell workspace
-- Reset and simple challenge ideas later
+- Interactive periodic table inspired by ptable.com Properties mode
+- 480x320 landscape layout
+- Left info panel with lean element details
+- Right compressed periodic table grid
+- Tap/click an element to update the info panel
+
+Chosen left-panel fields:
+
+- Atomic mass
+- Category / series
+- Group / period
+- Electron shells
+- State at room temp
+- Electronegativity
 
 ## Skipped for now
 

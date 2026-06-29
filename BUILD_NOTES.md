@@ -135,3 +135,11 @@
 - Visual verification passed.
 - No BitSlate OS launcher yet.
 - No drag mode or game mode yet.
+
+## 2026-06-29 Periodic Table Planning
+
+- Periodic Table research/planning started.
+- This is a BitSlate STEM app, not a PhET lab.
+- Planned layout is a 480x320 screen with a left info panel and right compressed periodic table grid.
+- Left panel will focus on atomic mass, category/series, group/period, electron shells, state at room temp, and electronegativity.
+- Python prototype, portable C++ core, and embedded LVGL app are not implemented yet.
