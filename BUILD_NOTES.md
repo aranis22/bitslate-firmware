@@ -55,3 +55,11 @@
 - Circuit Lab is now tracked as the first modular STEM app.
 - Collision Lab v0 is the next planned STEM app.
 - Workflow remains desktop prototype, portable model/core, embedded LVGL app, then polish.
+
+## 2026-06-29 Desktop Collision Lab Prototype
+
+- Started Collision Lab desktop prototype on `desktop-collision-lab-prototype`.
+- Decoded PhET Collision Lab model and UI references.
+- Built simplified 1D Python prototype with two balls, mass/velocity sliders, play/pause/reset, elastic collision, wall bounce, momentum, and kinetic energy.
+- Added plain Python model tests.
+- Embedded Collision Lab port is not started yet.
