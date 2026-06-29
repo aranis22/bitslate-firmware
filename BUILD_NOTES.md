@@ -70,3 +70,25 @@
 - C++ portable core was created in `portable-core/collision-lab/`.
 - C++ core mirrors the 1D elastic collision model from the Python prototype.
 - Embedded LVGL integration is not started yet.
+
+## 2026-06-29 STEM v0 Checkpoints and Masses & Springs Research
+
+- Circuit Lab v0 and Collision Lab v0 are checkpointed.
+- Apps are being documented as future BitSlate OS modules.
+- Masses & Springs / Hooke's Law research started.
+- Forces & Motion and Wave Interference are skipped for now.
+- Do not change the verified display pins while continuing STEM app work.
+
+## 2026-06-29 Desktop Masses & Springs Prototype
+
+- Started Masses & Springs desktop prototype.
+- Uses one spring and one mass.
+- Implements Hooke's law, gravity, damping, and drag/release.
+- Embedded LVGL integration is not started.
+
+## 2026-06-29 Masses & Springs Portable Core
+
+- Desktop Masses & Springs prototype worked visually.
+- C++ portable core created in `portable-core/masses-springs/`.
+- C++ core mirrors Hooke's law, gravity, damping, and drag/release model.
+- Embedded LVGL integration is not started yet.
