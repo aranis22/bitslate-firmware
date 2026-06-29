@@ -9,6 +9,7 @@ from spring_model import SpringMassModel
 WIDTH = 480
 HEIGHT = 320
 FPS = 60
+SPRING_AREA_Y_OFFSET = 22
 
 BG = (239, 244, 252)
 PANEL = (222, 232, 246)
@@ -92,21 +93,25 @@ def draw_text(screen, font, text, x, y, color=INK):
     screen.blit(font.render(text, True, color), (x, y))
 
 
+def visual_y(model_y):
+    return int(model_y + SPRING_AREA_Y_OFFSET)
+
+
 def draw_spring(screen, model):
-    top = (model.anchor_x, model.anchor_y)
-    bottom_y = int(model.get_mass_y() - 22)
+    top = (model.anchor_x, visual_y(model.anchor_y))
+    bottom_y = visual_y(model.get_mass_y() - 22)
     coils = 9
     width = 26
-    points = [top, (model.anchor_x, model.anchor_y + 12)]
-    span = max(20, bottom_y - model.anchor_y - 24)
+    points = [top, (model.anchor_x, visual_y(model.anchor_y + 12))]
+    span = max(20, bottom_y - visual_y(model.anchor_y) - 24)
     for i in range(coils + 1):
-        y = model.anchor_y + 12 + span * i / coils
+        y = visual_y(model.anchor_y + 12) + span * i / coils
         x = model.anchor_x + (-width // 2 if i % 2 == 0 else width // 2)
         points.append((int(x), int(y)))
     points.append((model.anchor_x, bottom_y))
     pygame.draw.lines(screen, SPRING, False, points, 3)
     pygame.draw.circle(screen, INK, top, 5)
-    pygame.draw.line(screen, INK, (model.anchor_x - 55, model.anchor_y - 8), (model.anchor_x + 55, model.anchor_y - 8), 4)
+    pygame.draw.line(screen, INK, (model.anchor_x - 55, visual_y(model.anchor_y - 8)), (model.anchor_x + 55, visual_y(model.anchor_y - 8)), 4)
 
 
 def draw_dashed_line(screen, y, color, start_x=54, end_x=280):
@@ -121,8 +126,8 @@ def draw_model(screen, model, big_font, font, small_font):
     pygame.draw.rect(screen, (180, 195, 218), (8, 8, 304, 304), 1, border_radius=8)
     draw_text(screen, big_font, "Masses & Springs", 22, 16)
 
-    rest_y = model.anchor_y + model.rest_length
-    equilibrium_y = rest_y + model.get_equilibrium_extension() * model.PIXELS_PER_METER
+    rest_y = visual_y(model.anchor_y + model.rest_length)
+    equilibrium_y = visual_y(model.anchor_y + model.rest_length + model.get_equilibrium_extension() * model.PIXELS_PER_METER)
     draw_dashed_line(screen, rest_y, MUTED)
     draw_text(screen, small_font, "rest", 60, int(rest_y - 15), MUTED)
     draw_dashed_line(screen, equilibrium_y, GREEN)
@@ -130,7 +135,7 @@ def draw_model(screen, model, big_font, font, small_font):
 
     draw_spring(screen, model)
 
-    mass_y = int(model.get_mass_y())
+    mass_y = visual_y(model.get_mass_y())
     mass_rect = pygame.Rect(model.anchor_x - 30, mass_y - 18, 60, 36)
     pygame.draw.rect(screen, ORANGE, mass_rect, border_radius=7)
     pygame.draw.rect(screen, (130, 74, 35), mass_rect, 2, border_radius=7)
@@ -174,7 +179,7 @@ def draw_controls(screen, model, buttons, sliders, font, small_font):
 
 
 def mass_hit(model, pos):
-    mass_y = int(model.get_mass_y())
+    mass_y = visual_y(model.get_mass_y())
     return pygame.Rect(model.anchor_x - 34, mass_y - 24, 68, 48).collidepoint(pos)
 
 
@@ -225,12 +230,12 @@ def main():
                 if not handled:
                     handled = any(slider.handle_down(pos) for slider in sliders)
                 if not handled and mass_hit(model, pos):
-                    model.start_drag(pos[1])
+                    model.start_drag(pos[1] - SPRING_AREA_Y_OFFSET)
             elif event.type == pygame.MOUSEMOTION:
                 for slider in sliders:
                     slider.handle_motion(event.pos)
                 if model.dragging:
-                    model.drag_to(event.pos[1])
+                    model.drag_to(event.pos[1] - SPRING_AREA_Y_OFFSET)
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 for slider in sliders:
                     slider.handle_up()
