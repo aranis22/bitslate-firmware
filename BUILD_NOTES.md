@@ -152,3 +152,11 @@
 - Right side shows a compressed, category-colored periodic table grid.
 - Lanthanides and actinides are shown as bottom rows.
 - Embedded LVGL integration is not started.
+
+## 2026-06-29 Periodic Table Portable Core
+
+- Periodic Table portable C++ core created in `portable-core/periodic-table/`.
+- Core uses a static table of 118 elements.
+- Supports lookup by atomic number and grid position.
+- Default selected element is Carbon.
+- Desktop Python prototype remains the reference UI for now.

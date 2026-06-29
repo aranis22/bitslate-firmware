@@ -1,4 +1,4 @@
-# Periodic Table Prototype Notes
+﻿# Periodic Table Prototype Notes
 
 ## Screen Constraint
 
@@ -19,7 +19,8 @@
 - Lanthanides and actinides are displayed as two bottom rows.
 - Cells show atomic number and symbol.
 - The selected element is outlined.
-- Detailed fields use `—` when a value is unknown.
+- Detailed fields use `-` when a value is unknown.
+- The portable C++ core should mirror the same 118-element table and selection behavior.
 
 ## Lean Info Panel Fields
 
@@ -38,3 +39,4 @@ Unknown values should display as `-`.
 - No huge property list.
 - No animations.
 - No embedded LVGL integration yet.
+
