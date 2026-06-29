@@ -33,3 +33,9 @@ The PhET implementation is built for a full-featured browser simulation with mul
 ## Next Step
 
 Create a portable C++ core that mirrors the Python model, then integrate that core into a future embedded LVGL Masses & Springs app.
+
+## Portable C++ Core
+
+- C++ portable core now mirrors the Python model.
+- Python remains the visual sandbox for interaction and feel.
+- C++ core is the future embedded logic source.

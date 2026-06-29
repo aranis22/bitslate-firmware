@@ -85,3 +85,10 @@
 - Uses one spring and one mass.
 - Implements Hooke's law, gravity, damping, and drag/release.
 - Embedded LVGL integration is not started.
+
+## 2026-06-29 Masses & Springs Portable Core
+
+- Desktop Masses & Springs prototype worked visually.
+- C++ portable core created in `portable-core/masses-springs/`.
+- C++ core mirrors Hooke's law, gravity, damping, and drag/release model.
+- Embedded LVGL integration is not started yet.
