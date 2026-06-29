@@ -160,3 +160,25 @@
 - Supports lookup by atomic number and grid position.
 - Default selected element is Carbon.
 - Desktop Python prototype remains the reference UI for now.
+
+## 2026-06-29 Embedded Periodic Table v0 and STEM Folder Grouping
+
+- Embedded Periodic Table v0 is working on hardware.
+- Periodic Table cells now show symbols only for readability.
+- Left info panel text was tightened to fit the 480x320 layout.
+- The periodic grid is clickable and updates the selected element.
+- Category colors are working.
+- No zoom/scroll yet.
+- No temperature slider.
+- No advanced property pages yet.
+- Embedded STEM app folders are now grouped by subject:
+  - Physics
+    - Circuit Lab
+    - Collision Lab
+    - Masses & Springs
+  - Chemistry
+    - Build an Atom
+    - Periodic Table
+  - Math
+    - reserved for future apps
+- PlatformIO still uses a temporary narrow build filter for the Periodic Table validation branch.

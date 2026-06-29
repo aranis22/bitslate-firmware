@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/stem/build_atom/BuildAtomApp.h"
+#include "apps/stem/chemistry/periodic_table/PeriodicTableApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Build an Atom embedded v0");
+  Serial.println("BitSlate Periodic Table embedded v0");
   Serial.println("before display.init");
 
   display.init();
@@ -55,6 +55,7 @@ void setup() {
   Serial.println("after display.init");
 
   lv_init();
+  Serial.println("after lv_init");
 
   lvDisplay = lv_display_create(SCREEN_W, SCREEN_H);
   lv_display_set_flush_cb(lvDisplay, lvglFlush);
@@ -70,18 +71,25 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  BuildAtomApp::create();
+  Serial.println("before PeriodicTableApp::create");
+  PeriodicTableApp::create();
+  Serial.println("after PeriodicTableApp::create");
 
-  Serial.println("Build an Atom screen created");
+  Serial.println("Periodic Table screen created");
 }
 
 void loop() {
   static uint32_t lastTick = millis();
+  static uint32_t lastAlive = 0;
 
   uint32_t now = millis();
   lv_tick_inc(now - lastTick);
   lastTick = now;
 
   lv_timer_handler();
+  if (now - lastAlive >= 2000) {
+    Serial.println("alive");
+    lastAlive = now;
+  }
   delay(5);
 }

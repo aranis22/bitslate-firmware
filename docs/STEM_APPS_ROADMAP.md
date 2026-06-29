@@ -2,6 +2,21 @@
 
 ## Current completed/prototype apps
 
+### STEM subject grouping
+
+```text
+STEM Apps
+  Physics
+    - Circuit Lab
+    - Collision Lab
+    - Masses & Springs
+  Chemistry
+    - Build an Atom
+    - Periodic Table
+  Math
+    - empty/planned next
+```
+
 ### Circuit Lab v0
 
 Status:
@@ -82,22 +97,23 @@ Status:
   - No game/challenge mode
   - No BitSlate OS launcher integration yet
 
-## Next app: Periodic Table
+### Periodic Table v0
 
 Status:
 
-- Research/planning started
-- Python prototype not implemented yet
-- C++ core not implemented yet
-- Embedded LVGL not implemented yet
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working/checkpointed
 
-Goal:
+Current features:
 
-- Interactive periodic table inspired by ptable.com Properties mode
+- Interactive periodic table inspired by ptable-style properties mode
 - 480x320 landscape layout
 - Left info panel with lean element details
 - Right compressed periodic table grid
-- Tap/click an element to update the info panel
+- Clickable periodic grid
+- Category colors
+- Symbol-only cells for readability
 
 Chosen left-panel fields:
 
@@ -107,6 +123,20 @@ Chosen left-panel fields:
 - Electron shells
 - State at room temp
 - Electronegativity
+
+Known limitations:
+
+- No zoom/scroll yet
+- No temperature slider
+- No advanced property pages
+- Still using a temporary narrow PlatformIO build filter for validation
+
+## Next app: Math
+
+Status:
+
+- Folder reserved
+- No prototype selected yet
 
 ## Skipped for now
 

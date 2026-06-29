@@ -6,7 +6,25 @@ BitSlate OS will eventually launch apps individually instead of hardcoding one a
 
 ## Current STEM apps
 
+### Subject layout
+
+```text
+STEM Apps
+  Physics
+    - Circuit Lab
+    - Collision Lab
+    - Masses & Springs
+  Chemistry
+    - Build an Atom
+    - Periodic Table
+  Math
+    - planned
+```
+
 ### Circuit Lab v0
+
+Module path:
+`src/apps/stem/physics/circuit_lab/`
 
 Status:
 
@@ -28,6 +46,9 @@ Expected app entry:
 `CircuitLabApp::create()`
 
 ### Collision Lab v0
+
+Module path:
+`src/apps/stem/physics/collision_lab/`
 
 Status:
 
@@ -51,6 +72,9 @@ Expected app entry:
 `CollisionLabApp::create()`
 
 ### Masses & Springs v0
+
+Module path:
+`src/apps/stem/physics/masses_springs/`
 
 Status:
 
@@ -78,6 +102,9 @@ Expected app entry:
 
 ### Build an Atom v0
 
+Module path:
+`src/apps/stem/chemistry/build_atom/`
+
 Status:
 
 - Desktop Python prototype: working
@@ -102,19 +129,23 @@ Expected app entry:
 
 ### Periodic Table
 
+Module path:
+`src/apps/stem/chemistry/periodic_table/`
+
 Status:
 
-- Research/planning started
-- Python prototype not implemented yet
-- C++ core not implemented yet
-- Embedded LVGL not implemented yet
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working/checkpointed
 
-Planned features:
+Current features:
 
 - 480x320 landscape layout
 - left info panel
-- compressed periodic table grid
-- tap/click an element to update details
+- compressed clickable periodic table grid
+- category colors
+- symbol-only cells for readability
+- tap/click element updates details
 - top six fields:
   - atomic mass
   - category / series
@@ -122,6 +153,12 @@ Planned features:
   - electron shells
   - state at room temp
   - electronegativity
+
+Current limitations:
+
+- no zoom/scroll yet
+- no temperature slider
+- no advanced property pages
 
 Expected app entry:
 `PeriodicTableApp::create()`
@@ -133,11 +170,14 @@ For now, `main.cpp` can temporarily call one app directly.
 Later, BitSlate OS should expose a launcher menu:
 
 - STEM Apps
-  - Circuit Lab
-  - Collision Lab
-  - Masses & Springs
-  - Build an Atom
-  - Periodic Table
+  - Physics
+    - Circuit Lab
+    - Collision Lab
+    - Masses & Springs
+  - Chemistry
+    - Build an Atom
+    - Periodic Table
+  - Math
 - Coding
 - Drawing
 - Lessons

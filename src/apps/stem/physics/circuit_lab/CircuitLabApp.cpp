@@ -2,7 +2,7 @@
 
 #include <lvgl.h>
 
-#include "circuit/CircuitModel.h"
+#include "CircuitModel.h"
 
 namespace {
 
