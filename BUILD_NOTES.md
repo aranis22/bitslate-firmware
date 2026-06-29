@@ -123,3 +123,15 @@
 - Tray buttons show matching colored particle icons.
 - Center atom area shows nucleus, shell 1, shell 2, particle counts, and readouts.
 - Embedded LVGL integration is starting next on a separate branch.
+
+## 2026-06-29 Embedded Build an Atom v0
+
+- Build an Atom embedded v0 was created.
+- UI refined with a right-side boxed element card.
+- Atom diagram and readout overlap was fixed.
+- Sidebar particle icon/text overlap was fixed.
+- Build passed.
+- Upload passed.
+- Visual verification passed.
+- No BitSlate OS launcher yet.
+- No drag mode or game mode yet.
