@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/stem/CircuitLabApp.h"
+#include "apps/stem/collision/CollisionLabApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Circuit Lab wire prototype");
+  Serial.println("BitSlate Collision Lab embedded v0");
   Serial.println("before display.init");
 
   display.init();
@@ -70,9 +70,9 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  CircuitLabApp::create();
+  CollisionLabApp::create();
 
-  Serial.println("Circuit Lab screen created");
+  Serial.println("Collision Lab screen created");
 }
 
 void loop() {
