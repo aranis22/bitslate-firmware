@@ -8,7 +8,18 @@ This is not embedded firmware. The intended workflow is:
 2. Portable C++ core.
 3. BitSlate LVGL app.
 
-The app target is a compact 480x320 interactive periodic table inspired by ptable.com Properties mode. The first prototype should focus on selecting an element and updating a lean info panel.
+The app is a compact 480x320 interactive periodic table inspired by ptable.com Properties mode. It uses a left info panel and a compressed periodic table grid. Click an element cell to update the selected element details.
+
+## Current v0
+
+- 480x320 pygame window.
+- Left selected-element info panel.
+- Right compressed periodic table grid.
+- All 118 elements included with correct symbol, name, atomic number, and grid position.
+- Category colors.
+- Selected element highlight.
+- Default selected element: Carbon.
+- No temperature slider, animations, embedded LVGL, or large property list.
 
 ## Planned Run Command
 
@@ -21,4 +32,3 @@ python desktop-prototypes/periodic-table-python/main.py
 ```powershell
 python desktop-prototypes/periodic-table-python/test_periodic_model.py
 ```
-

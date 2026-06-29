@@ -12,6 +12,15 @@
 - Right side: compressed periodic table grid.
 - Tap/click an element cell to update the left panel.
 
+## v0 Implementation Notes
+
+- The desktop prototype uses pygame.
+- All 118 elements are represented in the grid.
+- Lanthanides and actinides are displayed as two bottom rows.
+- Cells show atomic number and symbol.
+- The selected element is outlined.
+- Detailed fields use `—` when a value is unknown.
+
 ## Lean Info Panel Fields
 
 1. Atomic mass
@@ -29,4 +38,3 @@ Unknown values should display as `-`.
 - No huge property list.
 - No animations.
 - No embedded LVGL integration yet.
-

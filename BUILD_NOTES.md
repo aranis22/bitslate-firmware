@@ -143,3 +143,12 @@
 - Planned layout is a 480x320 screen with a left info panel and right compressed periodic table grid.
 - Left panel will focus on atomic mass, category/series, group/period, electron shells, state at room temp, and electronegativity.
 - Python prototype, portable C++ core, and embedded LVGL app are not implemented yet.
+
+## 2026-06-29 Periodic Table Desktop Prototype
+
+- Implemented the first pygame Periodic Table desktop prototype.
+- Includes all 118 elements with symbol, name, atomic number, and periodic-grid position.
+- Left info panel updates when an element is clicked.
+- Right side shows a compressed, category-colored periodic table grid.
+- Lanthanides and actinides are shown as bottom rows.
+- Embedded LVGL integration is not started.
