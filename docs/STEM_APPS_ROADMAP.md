@@ -2,13 +2,13 @@
 
 ## Current completed/prototype apps
 
-### Circuit Lab
+### Circuit Lab v0
 
 Status:
 
 - Desktop Python prototype: working
 - Portable C++ core: created
-- Embedded LVGL version: early prototype working
+- Embedded LVGL version: working/checkpointed
 - Current features:
   - Battery placement
   - Bulb placement
@@ -21,26 +21,51 @@ Status:
   - No resistor/switch/current animation yet
   - Graph/path logic only, not full circuit solver
 
-## Next app: Collision Lab v0
+### Collision Lab v0
+
+Status:
+
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working/checkpointed
+- Current features:
+  - Two balls
+  - Mass sliders
+  - Velocity sliders
+  - Play/pause/reset
+  - 1D elastic collision
+  - Wall bounce
+  - Momentum and kinetic energy display
+- Known limitations:
+  - No 2D angles
+  - No inelasticity slider
+  - No graph view
+
+## Next app: Masses & Springs / Hooke's Law
 
 Goal:
 
 - Desktop prototype first
-- 1D collision only at first
-- Two balls
-- Mass sliders
-- Velocity sliders
+- One spring and one mass at first
+- Vertical motion only
+- Spring constant slider
+- Mass slider
+- Damping slider
+- Gravity control
 - Play/pause/reset
-- Elastic collision
-- Wall bounce optional
+- Drag mass down and release
 
 Future:
 
-- 2D direction
-- Angle controls
-- Momentum arrows
-- Kinetic energy display
-- Inelastic collision slider
+- Embedded LVGL port
+- Energy display
+- Equilibrium marker
+- Measurement tools
+
+## Skipped for now
+
+- Forces & Motion
+- Wave Interference
 - Embedded LVGL port
 
 ## Workflow rule
