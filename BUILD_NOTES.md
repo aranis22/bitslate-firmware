@@ -48,3 +48,10 @@
 - C++ portable core was created in `portable-core/circuit-lab/`.
 - C++ core mirrors the Python graph/path logic.
 - Embedded LVGL integration is next, but not done in this checkpoint.
+
+## 2026-06-29 STEM Apps Roadmap
+
+- Embedded Circuit Lab prototype was checkpointed on `circuit-lab-embedded-core`.
+- Circuit Lab is now tracked as the first modular STEM app.
+- Collision Lab v0 is the next planned STEM app.
+- Workflow remains desktop prototype, portable model/core, embedded LVGL app, then polish.
