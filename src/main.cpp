@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/stem/collision/CollisionLabApp.h"
+#include "apps/stem/masses_springs/MassesSpringsApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Collision Lab embedded v0");
+  Serial.println("BitSlate Masses & Springs embedded v0");
   Serial.println("before display.init");
 
   display.init();
@@ -70,9 +70,9 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  CollisionLabApp::create();
+  MassesSpringsApp::create();
 
-  Serial.println("Collision Lab screen created");
+  Serial.println("Masses & Springs screen created");
 }
 
 void loop() {
