@@ -92,3 +92,11 @@
 - C++ portable core created in `portable-core/masses-springs/`.
 - C++ core mirrors Hooke's law, gravity, damping, and drag/release model.
 - Embedded LVGL integration is not started yet.
+
+## 2026-06-29 Embedded Masses & Springs v0
+
+- Embedded Masses & Springs v0 works visually.
+- UI fixes include equilibrium label placement, right control panel spacing, and raised bottom-left readouts.
+- Spring/mass animation moves while Play is pressed.
+- Build/upload worked on ESP32-S3.
+- Next STEM app research target is Build an Atom.

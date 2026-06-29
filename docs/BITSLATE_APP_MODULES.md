@@ -50,6 +50,32 @@ Status:
 Expected app entry:
 `CollisionLabApp::create()`
 
+### Masses & Springs v0
+
+Status:
+
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working
+- Features:
+  - one spring
+  - one mass
+  - Hooke's law
+  - gravity
+  - damping
+  - play/pause/reset
+  - mass, k, damping, gravity sliders
+  - displacement/force readouts
+- Current limitations:
+  - no multiple springs
+  - no energy graph
+  - no period measurement
+  - no ruler/tooling
+  - no BitSlate OS launcher integration yet
+
+Expected app entry:
+`MassesSpringsApp::create()`
+
 ## Future OS launcher rule
 
 For now, `main.cpp` can temporarily call one app directly.
@@ -60,6 +86,7 @@ Later, BitSlate OS should expose a launcher menu:
   - Circuit Lab
   - Collision Lab
   - Masses & Springs
+  - Build an Atom
 - Coding
 - Drawing
 - Lessons

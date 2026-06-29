@@ -41,32 +41,44 @@ Status:
   - No inelasticity slider
   - No graph view
 
-## Next app: Masses & Springs / Hooke's Law
+### Masses & Springs v0
+
+Status:
+
+- Desktop Python prototype: working
+- Portable C++ core: created
+- Embedded LVGL version: working/checkpointed
+- Current features:
+  - One spring
+  - One mass
+  - Hooke's law
+  - Gravity
+  - Damping
+  - Play/pause/reset
+  - Mass, k, damping, gravity sliders
+  - Displacement/force readouts
+- Known limitations:
+  - No multiple springs
+  - No energy graph
+  - No period measurement
+  - No ruler/tooling
+  - No BitSlate OS launcher integration yet
+
+## Next app: Build an Atom
 
 Goal:
 
 - Desktop prototype first
-- One spring and one mass at first
-- Vertical motion only
-- Spring constant slider
-- Mass slider
-- Damping slider
-- Gravity control
-- Play/pause/reset
-- Drag mass down and release
-
-Future:
-
-- Embedded LVGL port
-- Energy display
-- Equilibrium marker
-- Measurement tools
+- Proton, neutron, and electron counts
+- Simple element identity
+- Atomic number, mass number, and charge readouts
+- Nucleus and electron shell workspace
+- Reset and simple challenge ideas later
 
 ## Skipped for now
 
 - Forces & Motion
 - Wave Interference
-- Embedded LVGL port
 
 ## Workflow rule
 
