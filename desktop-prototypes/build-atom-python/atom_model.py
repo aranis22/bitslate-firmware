@@ -12,21 +12,26 @@ ELEMENTS = [
     ("Ne", "Neon"),
 ]
 
+MAX_PROTONS = 10
+MAX_ELECTRONS = 10
+
 
 class AtomModel:
-    """Small scaffold for the Build an Atom desktop prototype."""
+    """Minimal model for the Build an Atom desktop prototype."""
 
     def __init__(self):
         self.reset()
 
     def add_proton(self):
-        self.protons += 1
+        if self.protons < MAX_PROTONS:
+            self.protons += 1
 
     def add_neutron(self):
         self.neutrons += 1
 
     def add_electron(self):
-        self.electrons += 1
+        if self.electrons < MAX_ELECTRONS:
+            self.electrons += 1
 
     def reset(self):
         self.protons = 0
@@ -56,4 +61,3 @@ class AtomModel:
         shell_one = min(self.electrons, 2)
         shell_two = max(0, min(self.electrons - shell_one, 8))
         return shell_one, shell_two
-

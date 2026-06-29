@@ -116,3 +116,10 @@
 - C++ core tracks protons, neutrons, electrons, atomic number, mass number, charge, neutrality, and first-10-element lookup.
 - C++ core has assert tests for empty atom, H, He, Li ion, electron shell capacity, and reset.
 - Embedded LVGL integration is not started yet.
+
+## 2026-06-29 Build an Atom Desktop Prototype Update
+
+- Desktop pygame prototype has clickable Proton, Neutron, Electron, and Reset tray buttons.
+- Tray buttons show matching colored particle icons.
+- Center atom area shows nucleus, shell 1, shell 2, particle counts, and readouts.
+- Embedded LVGL integration is starting next on a separate branch.
