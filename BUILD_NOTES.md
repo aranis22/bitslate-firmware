@@ -78,3 +78,10 @@
 - Masses & Springs / Hooke's Law research started.
 - Forces & Motion and Wave Interference are skipped for now.
 - Do not change the verified display pins while continuing STEM app work.
+
+## 2026-06-29 Desktop Masses & Springs Prototype
+
+- Started Masses & Springs desktop prototype.
+- Uses one spring and one mass.
+- Implements Hooke's law, gravity, damping, and drag/release.
+- Embedded LVGL integration is not started.
