@@ -31,3 +31,11 @@
 
 This model should later become the basis for a portable C++ core before embedded LVGL work begins.
 
+## Portable C++ Core
+
+- Added in `portable-core/build-atom/`.
+- Mirrors the prototype's first-pass particle count logic.
+- Keeps Arduino, LVGL, LovyanGFX, and pygame out of the model.
+- Uses fixed lookup tables and no dynamic allocation.
+- Supports first 10 elements plus unknown atom state.
+- Ready to become the source of truth for the later embedded LVGL app.

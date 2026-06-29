@@ -108,3 +108,11 @@
 - PhET Build an Atom reference repo was cloned into ignored `research/phet-reference/` and inspected.
 - Desktop prototype scaffold created in `desktop-prototypes/build-atom-python/`.
 - Implementation is not started yet beyond a small model scaffold.
+
+## 2026-06-29 Build an Atom Portable Core
+
+- Build an Atom Python desktop prototype works visually.
+- Portable C++ core created in `portable-core/build-atom/`.
+- C++ core tracks protons, neutrons, electrons, atomic number, mass number, charge, neutrality, and first-10-element lookup.
+- C++ core has assert tests for empty atom, H, He, Li ion, electron shell capacity, and reset.
+- Embedded LVGL integration is not started yet.
