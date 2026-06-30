@@ -223,6 +223,61 @@ Status:
 Expected app entry:
 `GraphingCalculatorApp::create()`
 
+## Current games apps
+
+### Chess v0
+
+Module path:
+`src/apps/games/chess/`
+
+Status:
+
+- Desktop Python prototype: working
+- LVGL asset conversion: working
+- Embedded LVGL version: working
+- Portable C++ core: not started
+
+Current features:
+
+- 304x304 centered board
+- 38x38 clickable squares
+- 24x24 LVGL piece bitmaps
+- Standard starting position
+- White moves first
+- Tap-to-select and tap-to-move
+- Turn tracking
+- Legal movement for pawns, rooks, knights, bishops, queens, and kings
+- Captures
+- Own-piece capture prevention
+- Sliding-piece blocking
+- Pawn double move
+- Pawn diagonal capture
+- Auto-queen promotion
+
+Current limitations:
+
+- No check/checkmate yet
+- No castling
+- No en passant
+- No stalemate
+- No timers
+- No AI opponent yet
+- No multiplayer yet
+
+Next planned step:
+
+- Chess v1: Human vs AI
+  - start with random legal move or simple material-priority move selection
+  - no deep engine yet
+
+Later TODO:
+
+- Chess multiplayer
+  - BitSlate-to-BitSlate play over ESP-NOW
+  - one BitSlate as White and one as Black
+  - sync moves wirelessly
+  - handle reset/rematch
+
 ## Future OS launcher rule
 
 For now, `main.cpp` can temporarily call one app directly.

@@ -208,3 +208,25 @@
 - No zoom/pan yet.
 - No equation list yet.
 - PlatformIO still uses a temporary narrow build filter for graphing calculator validation on this branch.
+
+## 2026-06-30 Chess Python Prototype Start
+
+- Started BitSlate Chess in `src/apps/games/chess/`.
+- This step is desktop Python prototype only.
+- Prototype uses existing chess PNG assets from `src/assets/images/chess-piece-png/`.
+- Board, pieces, turn indicator, selection, status, and reset UI were added.
+- Model includes standard setup, turn alternation, legal moves for all normal pieces, captures, pawn double move, pawn diagonal capture, and auto-queen promotion.
+- Check/checkmate, castling, en passant, AI, and network play are intentionally deferred.
+
+## 2026-06-30 Embedded Chess v0
+
+- Chess Python desktop prototype: working.
+- LVGL chess asset conversion: working.
+- LVGL embedded board render: working.
+- Tap-to-move playable Chess v0 is working on hardware.
+- Chess pieces use 24x24 LVGL ARGB8888 bitmaps generated from the PNG source assets.
+- Board is centered at 304x304 with 38x38 clickable squares.
+- Embedded chess model supports standard starting position, white/black turns, pawns, rooks, knights, bishops, queens, kings, captures, own-piece capture prevention, sliding-piece blocking, pawn double move, pawn diagonal capture, and auto-queen promotion.
+- Check/checkmate, castling, en passant, stalemate, timers, AI, and multiplayer are not implemented yet.
+- Next planned step: Chess v1 Human vs AI with a simple rule-based opponent first, starting with random legal moves or a basic material-priority move picker.
+- Later TODO: Chess multiplayer over ESP-NOW, with one BitSlate as White and one as Black, synchronized moves, and reset/rematch flow.
