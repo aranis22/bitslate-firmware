@@ -14,7 +14,7 @@ STEM Apps
     - Build an Atom
     - Periodic Table
   Math
-    - empty/planned next
+    - Scientific Calculator
 ```
 
 ### Circuit Lab v0
@@ -131,12 +131,38 @@ Known limitations:
 - No advanced property pages
 - Still using a temporary narrow PlatformIO build filter for validation
 
+### Scientific Calculator v0
+
+Status:
+
+- Embedded LVGL version: working/checkpointed
+
+Current features:
+
+- Retro calculator UI
+- Monogram pixel font
+- Clickable keypad
+- `+`, `-`, `x`, `/`
+- Parentheses
+- `PI`
+- `ANS`
+- `SQR`, `SIN`, `COS`, `TAN`, `LOG`, `LN`
+- DEG/RAD toggle
+- `%`, `+/-`
+- Error handling: `ERR` and `DIV 0`
+
+Known limitations:
+
+- No graphing
+- No CAS
+- No equation solver yet
+
 ## Next app: Math
 
 Status:
 
-- Folder reserved
-- No prototype selected yet
+- Scientific Calculator v0 is now the first embedded Math app
+- Next Math app is not selected yet
 
 ## Skipped for now
 

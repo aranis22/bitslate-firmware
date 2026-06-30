@@ -18,7 +18,7 @@ STEM Apps
     - Build an Atom
     - Periodic Table
   Math
-    - planned
+    - Scientific Calculator
 ```
 
 ### Circuit Lab v0
@@ -163,6 +163,35 @@ Current limitations:
 Expected app entry:
 `PeriodicTableApp::create()`
 
+### Scientific Calculator v0
+
+Module path:
+`src/apps/stem/math/calculator/`
+
+Status:
+
+- Embedded LVGL version: working
+- Current features:
+  - retro calculator UI
+  - Monogram pixel font
+  - clickable keypad
+  - `+`, `-`, `x`, `/`
+  - parentheses
+  - `PI`
+  - `ANS`
+  - `SQR`, `SIN`, `COS`, `TAN`, `LOG`, `LN`
+  - DEG/RAD toggle
+  - `%`
+  - `+/-`
+  - `ERR` and `DIV 0` handling
+- Current limitations:
+  - no graphing
+  - no CAS
+  - no equation solver yet
+
+Expected app entry:
+`ScientificCalculatorApp::create()`
+
 ## Future OS launcher rule
 
 For now, `main.cpp` can temporarily call one app directly.
@@ -178,6 +207,7 @@ Later, BitSlate OS should expose a launcher menu:
     - Build an Atom
     - Periodic Table
   - Math
+    - Scientific Calculator
 - Coding
 - Drawing
 - Lessons

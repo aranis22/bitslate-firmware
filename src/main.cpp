@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/stem/chemistry/periodic_table/PeriodicTableApp.h"
+#include "apps/stem/math/calculator/ScientificCalculatorApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Periodic Table embedded v0");
+  Serial.println("BitSlate Scientific Calculator UI");
   Serial.println("before display.init");
 
   display.init();
@@ -71,11 +71,11 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  Serial.println("before PeriodicTableApp::create");
-  PeriodicTableApp::create();
-  Serial.println("after PeriodicTableApp::create");
+  Serial.println("before ScientificCalculatorApp::create");
+  ScientificCalculatorApp::create();
+  Serial.println("after ScientificCalculatorApp::create");
 
-  Serial.println("Periodic Table screen created");
+  Serial.println("Scientific Calculator screen created");
 }
 
 void loop() {

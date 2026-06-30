@@ -179,6 +179,18 @@
   - Chemistry
     - Build an Atom
     - Periodic Table
-  - Math
-    - reserved for future apps
+- Math
+  - reserved for future apps
 - PlatformIO still uses a temporary narrow build filter for the Periodic Table validation branch.
+
+## 2026-06-29 Embedded Scientific Calculator v0
+
+- Embedded Scientific Calculator v0 is working on hardware.
+- Retro LVGL calculator UI uses the Monogram pixel font.
+- Clickable keypad supports `+`, `-`, `x`, `/`, parentheses, `PI`, and `ANS`.
+- Scientific functions work: `SQR`, `SIN`, `COS`, `TAN`, `LOG`, and `LN`.
+- DEG/RAD toggle is integrated into the display area and updates trig evaluation mode.
+- `%` and `+/-` are implemented for calculator input flow.
+- Error handling shows `ERR` and `DIV 0`.
+- No graphing, CAS, or equation solver yet.
+- PlatformIO still uses a temporary narrow build filter for calculator validation on this branch.
