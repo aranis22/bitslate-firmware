@@ -194,3 +194,17 @@
 - Error handling shows `ERR` and `DIV 0`.
 - No graphing, CAS, or equation solver yet.
 - PlatformIO still uses a temporary narrow build filter for calculator validation on this branch.
+
+## 2026-06-30 Embedded Graphing Calculator v0
+
+- Embedded Graphing Calculator v0 is working on hardware.
+- Retro LVGL graphing calculator UI uses the Monogram pixel font.
+- Screen includes a graph panel, table panel, keypad, bottom display, and X/Y trace readouts.
+- Trace X can be controlled by touch slider and rotary encoder on GPIO38/GPIO39.
+- Trace updates refresh X/Y readouts, graph cursor, and generated table values.
+- Parser supports `X`, constants, optional `Y=` prefix, implicit multiplication, parentheses, powers, and functions `SIN`, `COS`, `TAN`, `SQR`, `LOG`, and `LN`.
+- Constant functions like `4` and `Y=4` graph as horizontal lines.
+- No multi-function graphing yet.
+- No zoom/pan yet.
+- No equation list yet.
+- PlatformIO still uses a temporary narrow build filter for graphing calculator validation on this branch.

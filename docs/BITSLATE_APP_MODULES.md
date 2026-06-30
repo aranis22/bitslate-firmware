@@ -19,6 +19,7 @@ STEM Apps
     - Periodic Table
   Math
     - Scientific Calculator
+    - Graphing Calculator
 ```
 
 ### Circuit Lab v0
@@ -192,6 +193,36 @@ Status:
 Expected app entry:
 `ScientificCalculatorApp::create()`
 
+### Graphing Calculator v0
+
+Module path:
+`src/apps/stem/math/graphing_calculator/`
+
+Status:
+
+- Embedded LVGL version: working
+- Current features:
+  - retro graphing calculator UI
+  - Monogram pixel font
+  - graph panel
+  - table panel
+  - keypad
+  - bottom display
+  - X/Y trace readouts
+  - touch-controlled X trace slider
+  - rotary encoder controlled X trace slider on GPIO38/GPIO39
+  - real function plotting
+  - generated table values
+  - parser support for `X`, constants, optional `Y=` prefix, implicit multiplication, parentheses, powers
+  - `SIN`, `COS`, `TAN`, `SQR`, `LOG`, `LN`
+- Current limitations:
+  - no multi-function graphing yet
+  - no zoom/pan yet
+  - no equation list yet
+
+Expected app entry:
+`GraphingCalculatorApp::create()`
+
 ## Future OS launcher rule
 
 For now, `main.cpp` can temporarily call one app directly.
@@ -208,6 +239,7 @@ Later, BitSlate OS should expose a launcher menu:
     - Periodic Table
   - Math
     - Scientific Calculator
+    - Graphing Calculator
 - Coding
 - Drawing
 - Lessons

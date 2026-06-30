@@ -15,6 +15,7 @@ STEM Apps
     - Periodic Table
   Math
     - Scientific Calculator
+    - Graphing Calculator
 ```
 
 ### Circuit Lab v0
@@ -157,12 +158,39 @@ Known limitations:
 - No CAS
 - No equation solver yet
 
+### Graphing Calculator v0
+
+Status:
+
+- Embedded LVGL version: working/checkpointed
+
+Current features:
+
+- Retro graphing calculator UI
+- Monogram pixel font
+- Graph panel
+- Table panel
+- Keypad
+- Bottom display
+- X/Y trace readouts
+- Touch-controlled X trace slider
+- Rotary encoder controlled X trace slider on GPIO38/GPIO39
+- Real function plotting
+- Generated table values
+- Parser supports `X`, constants, optional `Y=` prefix, implicit multiplication, parentheses, powers, and `SIN`, `COS`, `TAN`, `SQR`, `LOG`, `LN`
+
+Known limitations:
+
+- No multi-function graphing yet
+- No zoom/pan yet
+- No equation list yet
+
 ## Next app: Math
 
 Status:
 
-- Scientific Calculator v0 is now the first embedded Math app
-- Next Math app is not selected yet
+- Scientific Calculator v0 and Graphing Calculator v0 are now the embedded Math apps
+- Next Math app after calculators is not selected yet
 
 ## Skipped for now
 

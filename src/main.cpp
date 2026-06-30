@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/stem/math/calculator/ScientificCalculatorApp.h"
+#include "apps/stem/math/graphing_calculator/GraphingCalculatorApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Scientific Calculator UI");
+  Serial.println("BitSlate Graphing Calculator UI");
   Serial.println("before display.init");
 
   display.init();
@@ -71,11 +71,11 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  Serial.println("before ScientificCalculatorApp::create");
-  ScientificCalculatorApp::create();
-  Serial.println("after ScientificCalculatorApp::create");
+  Serial.println("before GraphingCalculatorApp::create");
+  GraphingCalculatorApp::create();
+  Serial.println("after GraphingCalculatorApp::create");
 
-  Serial.println("Scientific Calculator screen created");
+  Serial.println("Graphing Calculator screen created");
 }
 
 void loop() {
@@ -86,6 +86,7 @@ void loop() {
   lv_tick_inc(now - lastTick);
   lastTick = now;
 
+  GraphingCalculatorApp::update();
   lv_timer_handler();
   if (now - lastAlive >= 2000) {
     Serial.println("alive");
