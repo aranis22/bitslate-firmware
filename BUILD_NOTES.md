@@ -230,3 +230,81 @@
 - Check/checkmate, castling, en passant, stalemate, timers, AI, and multiplayer are not implemented yet.
 - Next planned step: Chess v1 Human vs AI with a simple rule-based opponent first, starting with random legal moves or a basic material-priority move picker.
 - Later TODO: Chess multiplayer over ESP-NOW, with one BitSlate as White and one as Black, synchronized moves, and reset/rematch flow.
+
+## 2026-07-01 American States Quiz Python Prototype
+
+- Started the BitSlate Geography app `American States Quiz`.
+- Desktop Python prototype created in `src/apps/geography/us_states_quiz/`.
+- Uses the USA map reference images in `src/apps/assets/images/geography/`.
+- v0 uses a simplified polygon-region approach instead of one bitmap per state.
+- Implemented a 15-state working subset for click detection and prompt flow.
+- Correct clicks highlight states and advance the prompt; wrong clicks keep the same target.
+- This prototype is meant to validate map fit, prompt flow, click-to-state detection, and color-fill feedback before any C++ or LVGL port.
+
+## 2026-07-01 American States Quiz Generated Map Direction
+
+- Geography work is now pivoted away from the visible-PNG overlay quiz approach.
+- Added a generated USA grid/cell map asset pipeline based on `usa-map-unselected.png`.
+- Preview now renders generated map data directly, without drawing the PNG as the visible map.
+- Added a manual state polygon editor that traces polygons in generated-map grid coordinates.
+- Initial manual tracing workflow is set up for California, Texas, and Washington.
+
+## 2026-07-01 American States Quiz 3-State Mini Quiz
+
+- Built the next desktop quiz step using only the traced polygons for Washington, California, and Texas.
+- The visible base map comes from generated grid data, not from directly displaying the PNG alone.
+- A light PNG overlay is still used for readability and alignment in this desktop phase.
+- Hit detection now uses the saved traced polygons from `state_polygons.py`.
+- Correct answers stay filled and the quiz advances through the 3-state prompt sequence.
+
+## 2026-07-01 American States Quiz 20-State Tracing Set
+
+- Returned focus to polygon authoring instead of quiz expansion.
+- Increased default overlay opacity in the polygon editor to make the PNG reference easier to trace against.
+- Expanded the editable tracing set to 20 states:
+  - California
+  - Texas
+  - Washington
+  - Oregon
+  - Nevada
+  - Arizona
+  - Colorado
+  - New Mexico
+  - Utah
+  - Idaho
+  - Montana
+  - Wyoming
+  - Florida
+  - Georgia
+  - New York
+  - Pennsylvania
+  - Michigan
+  - Illinois
+  - Ohio
+  - North Carolina
+- Existing California, Texas, and Washington polygons remain editable and clearable.
+- Editor now supports next/previous state navigation and save summaries.
+
+## 2026-07-01 American States Quiz Color-Segmented State Masks
+
+- Manual polygon tracing is now paused in favor of computer-generated state masks.
+- Added a color-segmentation pipeline based on `usa-map-full.png`.
+- The new generator maps colored states into the same generated grid coordinate system as `generated_us_map.py`.
+- First sample masks are generated for:
+  - California
+  - Texas
+  - Washington
+- Output is saved as grid-cell masks, not polygons.
+- This direction is a better fit for later ESP32/LVGL work because click detection can be grid-cell based instead of relying on per-state bitmaps or manual polygon outlines.
+
+## 2026-07-01 American States Quiz Generated Mask Cleanup
+
+- Current generated mask set is intentionally held at six states: California, Texas, Washington, South Dakota, Alaska, and Missouri.
+- Boundary-constrained generated masks are working with overlay preview (`O`) and border/label preview (`B`).
+- Final cleanup pass touched only Alaska, Washington, and Texas.
+- Alaska now preserves a single connected filled inset region using seed `(16, 88)`, `min_hits=1`, and cleanup `(4, 2)`.
+- Washington now uses seed `(15, 6)`, default `min_hits=2`, and cleanup `(6, 2)` for a slightly cleaner northwest mask.
+- Texas now uses seed `(70, 83)`, `min_hits=3`, and cleanup `(5, 2)` to reduce leakage and jagged artifacts.
+- California, South Dakota, and Missouri remain unchanged from the generated color-segmented masks.
+- Final mask cell counts: California 595, Texas 927, Washington 227, South Dakota 268, Alaska 281, Missouri 249.
+- Python mask tests and `py_compile` passed.
