@@ -11,3 +11,4 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 research/phet-reference/
+src/apps/geography/us_states_quiz/vector_pipeline/data/

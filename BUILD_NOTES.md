@@ -308,3 +308,17 @@
 - California, South Dakota, and Missouri remain unchanged from the generated color-segmented masks.
 - Final mask cell counts: California 595, Texas 927, Washington 227, South Dakota 268, Alaska 281, Missouri 249.
 - Python mask tests and `py_compile` passed.
+
+## 2026-07-02 American States Quiz Vector LVGL Checkpoint
+
+- American States Quiz now uses vector-derived U.S. Census Cartographic Boundary data.
+- Generated grid: `240x150`.
+- Exported states: `48` contiguous states.
+- Border cells: `3308`.
+- LVGL renders one RGB565 image buffer in PSRAM instead of drawing many objects.
+- Current map is enlarged, vertically stretched slightly, gray-filled, and drawn with white borders.
+- Quiz order: Washington, California, Texas, South Dakota, Missouri.
+- Touch conversion maps screen-local coordinates into the generated grid before calling the portable quiz core.
+- The embedded app uses `UsStatesQuizCore` and generated `UsStatesVectorData`.
+- No shapefile parser, PNG state maps, or full-color bitmap state assets are used on-device.
+- Desktop/vector prototype and generated-data pipeline exist under `src/apps/geography/us_states_quiz/vector_pipeline/`.

@@ -55,3 +55,15 @@ Current direction:
 1. build the next desktop quiz pass on top of generated masks
 2. port the compact grid-cell state model to portable C++
 3. build the LVGL BitSlate version later
+
+## Vector LVGL checkpoint
+
+- The active embedded app now uses the Census vector-derived pipeline rather than the earlier PNG/raster mask path.
+- `vector_pipeline/export_census_to_cpp.py` exports a `240x150` state-ID grid for 48 contiguous states.
+- Generated vector data lives in `generated/UsStatesVectorData.h` and `.cpp`.
+- Border overlay data is generated as `3308` grid cells.
+- Portable quiz behavior lives in `core/UsStatesQuizCore`.
+- LVGL renders one RGB565 buffer in PSRAM at the current display-map size, with gray USA fill, white borders, and colored completed states.
+- Quiz order is Washington, California, Texas, South Dakota, Missouri.
+- Touch maps from display pixels into the generated grid before calling the core.
+- There is no shapefile parser or PNG state-map asset on the ESP32.
