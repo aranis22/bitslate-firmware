@@ -333,3 +333,9 @@
 - Wrong answer shows `Try Again`.
 - Current app launch path is `FlagsQuizApp::create()`.
 - Previous app checkpoints include vector-based US States Quiz, Chess, calculators, and STEM simulations.
+
+## 2026-07-02 Zoomable Geography Map Engines
+
+- Zoomable USA map engine added with camera zoom/pan, bit-grid style rendering, capital dots/labels, and state labels.
+- Zoomable WORLD map added with Natural Earth generated data, blue ocean, colored countries, bit-grid style, borders, capitals/ocean labels, and zoom/pan.
+- Both maps use fixed RGB565 buffers and generated C++ data; no shapefile parsing runs on-device.
