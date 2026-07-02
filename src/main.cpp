@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/geography/us_states_quiz/lvgl/UsStatesQuizApp.h"
+#include "apps/geography/flags_quiz/lvgl/FlagsQuizApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
 
 static LGFX_BitSlate display;
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Geography LVGL smoke test");
+  Serial.println("BitSlate Flags Quiz LVGL smoke test");
   Serial.println("before display.init");
 
   display.init();
@@ -71,11 +71,11 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  Serial.println("before UsStatesQuizApp::create");
-  UsStatesQuizApp::create();
-  Serial.println("after UsStatesQuizApp::create");
+  Serial.println("before FlagsQuizApp::create");
+  FlagsQuizApp::create();
+  Serial.println("after FlagsQuizApp::create");
 
-  Serial.println("Geography quiz screen created");
+  Serial.println("Flags quiz screen created");
 }
 
 void loop() {

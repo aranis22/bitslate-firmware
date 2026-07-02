@@ -322,3 +322,14 @@
 - The embedded app uses `UsStatesQuizCore` and generated `UsStatesVectorData`.
 - No shapefile parser, PNG state maps, or full-color bitmap state assets are used on-device.
 - Desktop/vector prototype and generated-data pipeline exist under `src/apps/geography/us_states_quiz/vector_pipeline/`.
+
+## 2026-07-02 Phase 1 Initial Apps Checkpoint
+
+- Flags Quiz LVGL prototype added.
+- Multi-flag quiz uses converted PNG flag assets as LVGL RGB565 image descriptors.
+- Four-answer touch UI works.
+- Correct answer shows bright green `Correct!`.
+- App advances after a non-blocking 4-second LVGL timer.
+- Wrong answer shows `Try Again`.
+- Current app launch path is `FlagsQuizApp::create()`.
+- Previous app checkpoints include vector-based US States Quiz, Chess, calculators, and STEM simulations.
