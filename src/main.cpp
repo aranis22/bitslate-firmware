@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <lvgl.h>
-#include "apps/geography/us_states_quiz/lvgl/ZoomableWorldMapApp.h"
 #include "hal/display/LGFX_BitSlate.hpp"
+#include "ui/screens/home_screen.h"
 
 static LGFX_BitSlate display;
 
@@ -46,7 +46,7 @@ void setup() {
   Serial.begin(115200);
   delay(2000);
 
-  Serial.println("BitSlate Zoomable World Map LVGL smoke test");
+  Serial.println("BitSlate Home Screen LVGL smoke test");
   Serial.println("before display.init");
 
   display.init();
@@ -71,11 +71,12 @@ void setup() {
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
 
-  Serial.println("before ZoomableWorldMapApp::create");
-  ZoomableWorldMapApp::create();
-  Serial.println("after ZoomableWorldMapApp::create");
+  Serial.println("before home_screen_create");
+  lv_obj_t* homeScreen = home_screen_create(nullptr);
+  lv_scr_load(homeScreen);
+  Serial.println("after home_screen_create");
 
-  Serial.println("Zoomable map screen created");
+  Serial.println("Home screen created");
 }
 
 void loop() {
