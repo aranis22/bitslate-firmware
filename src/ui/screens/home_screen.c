@@ -1,6 +1,7 @@
 #include "home_screen.h"
 
 #include "apps/games/chess/lvgl/ChessRenderSmokeApp.h"
+#include "apps/geography/us_states_quiz/lvgl/ZoomableWorldMapApp.h"
 #include "assets/UI/home/ui_home_assets.h"
 
 LV_FONT_DECLARE(monogram_16);
@@ -48,14 +49,19 @@ enum {
   BATTERY_X = 400,
   BATTERY_Y = 6,
 
-  CHESS_ICON_SCALE = 114,
-  CHESS_ICON_REST_OFFSET_Y = 90,
-  CHESS_ICON_IDLE_RANGE_Y = 4,
-  CHESS_ICON_IDLE_HALF_CYCLE_MS = 400,
-  CHESS_LABEL_X = 170,
-  CHESS_LABEL_Y = 288,
-  CHESS_LABEL_W = 140,
-  CHESS_LABEL_H = 32,
+  CARD_REST_OFFSET_Y = 30,
+  CARD_WIDTH = 220,
+  CARD_HEIGHT = 220,
+  CARD_VIEWPORT_X = (SCREEN_W - CARD_WIDTH) / 2,
+  CARD_VIEWPORT_REST_Y = (SCREEN_H - CARD_HEIGHT) / 2 + CARD_REST_OFFSET_Y,
+  CARD_STRIP_WIDTH = CARD_WIDTH * 2,
+  CARD_IDLE_RANGE_Y = 4,
+  CARD_IDLE_HALF_CYCLE_MS = 400,
+  CARD_LABEL_X = 170,
+  CARD_LABEL_Y = 288,
+  CARD_LABEL_W = 140,
+  CARD_LABEL_H = 32,
+  CARD_TRANSITION_MS = 250,
 
   ARROW_SCALE = 333,
   LEFT_ARROW_X = 17,
@@ -85,13 +91,39 @@ enum {
   RIGHT_CASTLE_H = 152,
 };
 
-typedef struct {
-  lv_obj_t *icon;
-  int resting_y;
-  bool launch_in_progress;
-} chess_launcher_state_t;
+typedef void (*launcher_launch_cb_t)(void);
 
-static chess_launcher_state_t chess_launcher = {0};
+typedef struct {
+  const lv_image_dsc_t *image;
+  const char *label;
+  launcher_launch_cb_t launch;
+} launcher_card_dsc_t;
+
+typedef struct {
+  lv_obj_t *viewport;
+  lv_obj_t *strip;
+  lv_obj_t *left_slot;
+  lv_obj_t *right_slot;
+  lv_obj_t *card_label;
+  lv_obj_t *page_counter;
+  lv_obj_t *left_arrow;
+  lv_obj_t *right_arrow;
+  uint32_t selected_index;
+  uint32_t pending_index;
+  bool transition_in_progress;
+  bool launch_in_progress;
+} launcher_state_t;
+
+static void launch_chess(void);
+static void launch_world_map(void);
+static void set_strip_x(void *obj, int32_t x);
+
+static const launcher_card_dsc_t launcher_cards[] = {
+  {&ui_home_chess_icon, "Chess", launch_chess},
+  {&ui_home_world_map_card, "World map", launch_world_map},
+};
+
+static launcher_state_t launcher = {0};
 
 static lv_color_t color(unsigned int hex) {
   return lv_color_hex(hex);
@@ -150,41 +182,123 @@ static lv_obj_t *scaled_image(lv_obj_t *parent, const lv_image_dsc_t *src, int x
   return obj;
 }
 
-static lv_obj_t *centered_scaled_image(lv_obj_t *parent, const lv_image_dsc_t *src, int scale) {
-  lv_obj_t *obj = image(parent, src, 0, 0);
-  lv_image_set_scale(obj, scale);
-  lv_obj_center(obj);
-  return obj;
-}
-
-static void set_icon_y(void *obj, int32_t y) {
+static void set_viewport_y(void *obj, int32_t y) {
   lv_obj_set_y((lv_obj_t *)obj, y);
 }
 
-static void start_icon_idle_animation(void) {
+static void start_card_idle_animation(void) {
   lv_anim_t animation;
   lv_anim_init(&animation);
-  lv_anim_set_var(&animation, chess_launcher.icon);
-  lv_anim_set_exec_cb(&animation, set_icon_y);
+  lv_anim_set_var(&animation, launcher.viewport);
+  lv_anim_set_exec_cb(&animation, set_viewport_y);
   lv_anim_set_values(&animation,
-                     chess_launcher.resting_y - CHESS_ICON_IDLE_RANGE_Y,
-                     chess_launcher.resting_y + CHESS_ICON_IDLE_RANGE_Y);
-  lv_anim_set_duration(&animation, CHESS_ICON_IDLE_HALF_CYCLE_MS);
-  lv_anim_set_reverse_duration(&animation, CHESS_ICON_IDLE_HALF_CYCLE_MS);
+                     CARD_VIEWPORT_REST_Y - CARD_IDLE_RANGE_Y,
+                     CARD_VIEWPORT_REST_Y + CARD_IDLE_RANGE_Y);
+  lv_anim_set_duration(&animation, CARD_IDLE_HALF_CYCLE_MS);
+  lv_anim_set_reverse_duration(&animation, CARD_IDLE_HALF_CYCLE_MS);
   lv_anim_set_repeat_count(&animation, LV_ANIM_REPEAT_INFINITE);
   lv_anim_set_path_cb(&animation, lv_anim_path_ease_in_out);
   lv_anim_start(&animation);
 }
 
-static void chess_icon_clicked(lv_event_t *event) {
-  if(lv_event_get_code(event) != LV_EVENT_CLICKED || chess_launcher.launch_in_progress) return;
+static void stop_card_idle_animation(void) {
+  if(launcher.viewport == NULL) return;
+  lv_anim_delete(launcher.viewport, set_viewport_y);
+  lv_obj_set_y(launcher.viewport, CARD_VIEWPORT_REST_Y);
+}
 
-  chess_launcher.launch_in_progress = true;
-  lv_obj_clear_flag(chess_launcher.icon, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_t *home = lv_obj_get_screen(chess_launcher.icon);
-  chess_launcher.icon = NULL;
+static void launch_chess(void) {
   chess_render_smoke_app_create();
+}
+
+static void launch_world_map(void) {
+  zoomable_world_map_app_create();
+}
+
+static void launcher_card_clicked(lv_event_t *event) {
+  if(lv_event_get_code(event) != LV_EVENT_CLICKED ||
+     launcher.transition_in_progress || launcher.launch_in_progress) return;
+
+  const launcher_card_dsc_t *card = &launcher_cards[launcher.selected_index];
+  if(card->launch == NULL) return;
+
+  launcher.launch_in_progress = true;
+  stop_card_idle_animation();
+  lv_obj_clear_flag(launcher.viewport, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_t *home = lv_obj_get_screen(launcher.viewport);
+  launcher.viewport = NULL;
+  card->launch();
   lv_obj_delete_async(home);
+}
+
+static void update_page_counter(void) {
+  if(launcher.page_counter != NULL) {
+    lv_label_set_text_fmt(launcher.page_counter, "%lu/13", (unsigned long)(launcher.selected_index + 1));
+  }
+}
+
+static void card_transition_finished(lv_anim_t *animation) {
+  (void)animation;
+  launcher.selected_index = launcher.pending_index;
+  lv_image_set_src(launcher.left_slot, launcher_cards[launcher.selected_index].image);
+  lv_image_set_src(launcher.right_slot, launcher_cards[launcher.selected_index].image);
+  lv_obj_set_x(launcher.strip, 0);
+  lv_label_set_text(launcher.card_label, launcher_cards[launcher.selected_index].label);
+  launcher.transition_in_progress = false;
+  lv_obj_add_flag(launcher.left_arrow, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_flag(launcher.right_arrow, LV_OBJ_FLAG_CLICKABLE);
+  update_page_counter();
+  lv_obj_invalidate(launcher.viewport);
+  start_card_idle_animation();
+}
+
+static void set_strip_x(void *obj, int32_t x) {
+  lv_obj_set_x((lv_obj_t *)obj, x);
+}
+
+static void start_card_transition_animation(int start_x, int end_x) {
+  lv_anim_delete(launcher.strip, set_strip_x);
+  lv_anim_t animation;
+  lv_anim_init(&animation);
+  lv_anim_set_var(&animation, launcher.strip);
+  lv_anim_set_exec_cb(&animation, set_strip_x);
+  lv_anim_set_values(&animation, start_x, end_x);
+  lv_anim_set_duration(&animation, CARD_TRANSITION_MS);
+  lv_anim_set_path_cb(&animation, lv_anim_path_ease_out);
+  lv_anim_set_completed_cb(&animation, card_transition_finished);
+  lv_anim_start(&animation);
+}
+
+void home_screen_navigate(int direction) {
+  if(launcher.viewport == NULL || launcher.transition_in_progress ||
+     launcher.launch_in_progress || (direction != -1 && direction != 1)) return;
+
+  int card_count = (int)(sizeof(launcher_cards) / sizeof(launcher_cards[0]));
+  int next_index = ((int)launcher.selected_index + direction + card_count) % card_count;
+
+  launcher.transition_in_progress = true;
+  launcher.pending_index = (uint32_t)next_index;
+  lv_obj_clear_flag(launcher.left_arrow, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_clear_flag(launcher.right_arrow, LV_OBJ_FLAG_CLICKABLE);
+  stop_card_idle_animation();
+
+  if(direction > 0) {
+    lv_image_set_src(launcher.left_slot, launcher_cards[launcher.selected_index].image);
+    lv_image_set_src(launcher.right_slot, launcher_cards[launcher.pending_index].image);
+    lv_obj_set_x(launcher.strip, 0);
+    start_card_transition_animation(0, -CARD_WIDTH);
+  }
+  else {
+    lv_image_set_src(launcher.left_slot, launcher_cards[launcher.pending_index].image);
+    lv_image_set_src(launcher.right_slot, launcher_cards[launcher.selected_index].image);
+    lv_obj_set_x(launcher.strip, -CARD_WIDTH);
+    start_card_transition_animation(-CARD_WIDTH, 0);
+  }
+}
+
+static void launcher_arrow_clicked(lv_event_t *event) {
+  if(lv_event_get_code(event) != LV_EVENT_CLICKED) return;
+  home_screen_navigate((int)(intptr_t)lv_event_get_user_data(event));
 }
 
 static void draw_bricks(lv_obj_t *screen) {
@@ -271,35 +385,48 @@ static void draw_status_bar(lv_obj_t *screen) {
   lv_obj_set_style_text_letter_space(badge_label, 0, 0);
   lv_obj_center(badge_label);
 
-  label(screen, "1/13", &monogram_28, PAGE_X, PAGE_Y, 57, 24);
+  launcher.page_counter = label(screen, "1/13", &monogram_28, PAGE_X, PAGE_Y, 57, 24);
   label(screen, "7:33pm", &monogram_28, TIME_X, TIME_Y, 76, 24);
 }
 
 static void draw_launcher(lv_obj_t *screen) {
-  chess_launcher.icon = centered_scaled_image(screen, &ui_home_chess_icon, CHESS_ICON_SCALE);
-  lv_obj_update_layout(chess_launcher.icon);
-  chess_launcher.resting_y = lv_obj_get_y(chess_launcher.icon) + CHESS_ICON_REST_OFFSET_Y;
-  lv_obj_set_y(chess_launcher.icon, chess_launcher.resting_y - CHESS_ICON_IDLE_RANGE_Y);
-  lv_obj_add_flag(chess_launcher.icon, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_add_event_cb(chess_launcher.icon, chess_icon_clicked, LV_EVENT_CLICKED, NULL);
-  start_icon_idle_animation();
-  label(screen, "Chess", &monogram_32, CHESS_LABEL_X, CHESS_LABEL_Y, CHESS_LABEL_W, CHESS_LABEL_H);
-  scaled_image(screen, &ui_home_left_arrow, LEFT_ARROW_X, LEFT_ARROW_Y, ARROW_SCALE);
-  scaled_image(screen, &ui_home_right_arrow, RIGHT_ARROW_X, RIGHT_ARROW_Y, ARROW_SCALE);
+  launcher.viewport = lv_obj_create(screen);
+  clear_obj(launcher.viewport);
+  lv_obj_set_pos(launcher.viewport, CARD_VIEWPORT_X, CARD_VIEWPORT_REST_Y);
+  lv_obj_set_size(launcher.viewport, CARD_WIDTH, CARD_HEIGHT);
+  lv_obj_clear_flag(launcher.viewport, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+  lv_obj_add_flag(launcher.viewport, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(launcher.viewport, launcher_card_clicked, LV_EVENT_CLICKED, NULL);
+
+  launcher.strip = lv_obj_create(launcher.viewport);
+  clear_obj(launcher.strip);
+  lv_obj_set_pos(launcher.strip, 0, 0);
+  lv_obj_set_size(launcher.strip, CARD_STRIP_WIDTH, CARD_HEIGHT);
+
+  launcher.left_slot = image(launcher.strip, launcher_cards[launcher.selected_index].image, 0, 0);
+  launcher.right_slot = image(launcher.strip, launcher_cards[launcher.selected_index].image, CARD_WIDTH, 0);
+  launcher.card_label = label(screen, launcher_cards[launcher.selected_index].label,
+                              &monogram_32, CARD_LABEL_X, CARD_LABEL_Y, CARD_LABEL_W, CARD_LABEL_H);
+  start_card_idle_animation();
+
+  launcher.left_arrow = scaled_image(screen, &ui_home_left_arrow, LEFT_ARROW_X, LEFT_ARROW_Y, ARROW_SCALE);
+  lv_obj_add_flag(launcher.left_arrow, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(launcher.left_arrow, launcher_arrow_clicked, LV_EVENT_CLICKED, (void *)(intptr_t)-1);
+
+  launcher.right_arrow = scaled_image(screen, &ui_home_right_arrow, RIGHT_ARROW_X, RIGHT_ARROW_Y, ARROW_SCALE);
+  lv_obj_add_flag(launcher.right_arrow, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(launcher.right_arrow, launcher_arrow_clicked, LV_EVENT_CLICKED, (void *)(intptr_t)1);
 }
 
 lv_obj_t *home_screen_create(lv_obj_t *parent) {
   lv_obj_t *screen = parent != NULL ? parent : lv_obj_create(NULL);
   clear_obj(screen);
   lv_obj_clean(screen);
-  chess_launcher.icon = NULL;
-  chess_launcher.resting_y = 0;
-  chess_launcher.launch_in_progress = false;
+  launcher = (launcher_state_t){0};
   lv_obj_set_size(screen, SCREEN_W, SCREEN_H);
 
   draw_background(screen);
   draw_status_bar(screen);
   draw_launcher(screen);
-
   return screen;
 }

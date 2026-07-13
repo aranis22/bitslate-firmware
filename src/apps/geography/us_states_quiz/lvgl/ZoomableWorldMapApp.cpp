@@ -61,6 +61,7 @@ lv_point_t pressPoint = {};
 lv_point_t lastPoint = {};
 int dragDistance = 0;
 
+
 lv_color_t color(unsigned int hex) {
   return lv_color_hex(hex);
 }
@@ -387,6 +388,7 @@ void createOverlays() {
     capitalLabels[i] = makeLabel(mapArea, capitals[i].capitalName, &monogram_16, 0xFFFFFF);
     lv_obj_set_size(capitalLabels[i], CAPITAL_LABEL_W, CAPITAL_LABEL_H);
     styleOverlayLabel(capitalLabels[i], 0xFFFFFF);
+    if ((i & 7U) == 7U) yield();
   }
 
   const bitslate::geo::WorldLabelPoint* countries = mapCore.countryLabelPoints();
@@ -394,6 +396,7 @@ void createOverlays() {
     countryLabels[i] = makeLabel(mapArea, countries[i].countryName, &monogram_16, 0xFFFFFF);
     lv_obj_set_size(countryLabels[i], COUNTRY_LABEL_W, COUNTRY_LABEL_H);
     styleOverlayLabel(countryLabels[i], 0xFFFFFF);
+    if ((i & 7U) == 7U) yield();
   }
 
   const bitslate::geo::WorldOceanLabel* oceans = mapCore.oceanLabels();
@@ -488,4 +491,8 @@ void ZoomableWorldMapApp::create() {
   refreshLabelsButton();
 
   refreshMapView();
+}
+
+extern "C" void zoomable_world_map_app_create(void) {
+  ZoomableWorldMapApp::create();
 }
