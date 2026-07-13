@@ -28,6 +28,13 @@ public:
     int col;
   };
 
+  struct ChessMove {
+    int fromRow;
+    int fromCol;
+    int toRow;
+    int toCol;
+  };
+
   ChessGameModel();
 
   void reset();
@@ -39,6 +46,9 @@ public:
   int legalMoves(int row, int col, Position* outMoves, int maxMoves) const;
   bool isLegalMove(int fromRow, int fromCol, int toRow, int toCol) const;
   bool movePiece(int fromRow, int fromCol, int toRow, int toCol);
+  int getPieceValue(const Piece& piece) const;
+  bool findAutoOpponentMove(ChessMove& outMove) const;
+  bool makeAutoOpponentMove();
 
 private:
   Piece board_[8][8];

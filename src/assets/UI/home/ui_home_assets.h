@@ -15,9 +15,9 @@ extern const lv_image_dsc_t ui_home_battery;
 #define UI_HOME_CAPYBARA_HEIGHT 50
 extern const lv_image_dsc_t ui_home_capybara;
 
-#define UI_HOME_CHESS_UPDATED_WIDTH 495
-#define UI_HOME_CHESS_UPDATED_HEIGHT 495
-extern const lv_image_dsc_t ui_home_chess_updated;
+#define UI_HOME_CHESS_ICON_WIDTH 495
+#define UI_HOME_CHESS_ICON_HEIGHT 495
+extern const lv_image_dsc_t ui_home_chess_icon;
 
 #define UI_HOME_LEFT_ARROW_WIDTH 73
 #define UI_HOME_LEFT_ARROW_HEIGHT 73

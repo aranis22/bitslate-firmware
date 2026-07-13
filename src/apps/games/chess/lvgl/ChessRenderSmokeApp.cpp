@@ -190,6 +190,10 @@ void squareTapEvent(lv_event_t* event) {
   if (model.movePiece(selectedRow, selectedCol, row, col)) {
     clearSelection();
     refreshPieces();
+    if (model.getCurrentTurn() == ChessGameModel::COLOR_BLACK) {
+      model.makeAutoOpponentMove();
+      refreshPieces();
+    }
     updateTurnLabel();
     return;
   }
@@ -256,4 +260,8 @@ void ChessRenderSmokeApp::create() {
   clearInteraction(turnLabel);
 
   createBoard(screen);
+}
+
+extern "C" void chess_render_smoke_app_create(void) {
+  ChessRenderSmokeApp::create();
 }

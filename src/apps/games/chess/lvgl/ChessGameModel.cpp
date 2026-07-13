@@ -141,6 +141,69 @@ bool ChessGameModel::movePiece(int fromRow, int fromCol, int toRow, int toCol) {
   return true;
 }
 
+int ChessGameModel::getPieceValue(const Piece& piece) const {
+  switch (piece.type) {
+    case TYPE_QUEEN: return 9;
+    case TYPE_ROOK: return 5;
+    case TYPE_BISHOP: return 3;
+    case TYPE_KNIGHT: return 3;
+    case TYPE_PAWN: return 1;
+    case TYPE_KING: return 100;
+    default: return 0;
+  }
+}
+
+bool ChessGameModel::findAutoOpponentMove(ChessMove& outMove) const {
+  if (currentTurn_ != COLOR_BLACK) {
+    return false;
+  }
+
+  Position moves[32];
+  bool foundMove = false;
+  int bestScore = -1;
+
+  for (int row = 0; row < 8; ++row) {
+    for (int col = 0; col < 8; ++col) {
+      const Piece piece = board_[row][col];
+      if (piece.color != COLOR_BLACK) continue;
+
+      const int moveCount = collectLegalMoves(row, col, piece, moves, 32);
+      for (int i = 0; i < moveCount; ++i) {
+        const Position target = moves[i];
+        const Piece captured = board_[target.row][target.col];
+        const int score = getPieceValue(captured);
+        if (!foundMove || score > bestScore) {
+          foundMove = true;
+          bestScore = score;
+          outMove = {row, col, target.row, target.col};
+        }
+      }
+    }
+  }
+
+  return foundMove;
+}
+
+bool ChessGameModel::makeAutoOpponentMove() {
+  ChessMove move{};
+  if (!findAutoOpponentMove(move)) {
+    setStatus("NO CPU MOVE");
+    return false;
+  }
+
+  Piece piece = board_[move.fromRow][move.fromCol];
+  board_[move.toRow][move.toCol] = piece;
+  board_[move.fromRow][move.fromCol] = makePiece(COLOR_NONE, TYPE_NONE);
+
+  if (piece.type == TYPE_PAWN && move.toRow == 7) {
+    board_[move.toRow][move.toCol] = makePiece(piece.color, TYPE_QUEEN);
+  }
+
+  currentTurn_ = COLOR_WHITE;
+  setStatus("CPU MOVED");
+  return true;
+}
+
 bool ChessGameModel::inBounds(int row, int col) const {
   return row >= 0 && row < 8 && col >= 0 && col < 8;
 }

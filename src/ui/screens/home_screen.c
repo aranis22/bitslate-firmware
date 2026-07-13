@@ -1,5 +1,6 @@
 #include "home_screen.h"
 
+#include "apps/games/chess/lvgl/ChessRenderSmokeApp.h"
 #include "assets/UI/home/ui_home_assets.h"
 
 LV_FONT_DECLARE(monogram_16);
@@ -47,19 +48,14 @@ enum {
   BATTERY_X = 400,
   BATTERY_Y = 6,
 
-  CARD_X = 130,
-  CARD_Y = 60,
-  CARD_W = 220,
-  CARD_H = 220,
-  CARD_SHADOW_OFFSET = 5,
-
-  CHESS_ICON_X = CARD_X,
-  CHESS_ICON_Y = CARD_Y,
   CHESS_ICON_SCALE = 114,
+  CHESS_ICON_REST_OFFSET_Y = 90,
+  CHESS_ICON_IDLE_RANGE_Y = 4,
+  CHESS_ICON_IDLE_HALF_CYCLE_MS = 400,
   CHESS_LABEL_X = 170,
-  CHESS_LABEL_Y = 280,
+  CHESS_LABEL_Y = 288,
   CHESS_LABEL_W = 140,
-  CHESS_LABEL_H = 36,
+  CHESS_LABEL_H = 32,
 
   ARROW_SCALE = 333,
   LEFT_ARROW_X = 17,
@@ -88,6 +84,14 @@ enum {
   RIGHT_CASTLE_W = 75,
   RIGHT_CASTLE_H = 152,
 };
+
+typedef struct {
+  lv_obj_t *icon;
+  int resting_y;
+  bool launch_in_progress;
+} chess_launcher_state_t;
+
+static chess_launcher_state_t chess_launcher = {0};
 
 static lv_color_t color(unsigned int hex) {
   return lv_color_hex(hex);
@@ -144,6 +148,43 @@ static lv_obj_t *scaled_image(lv_obj_t *parent, const lv_image_dsc_t *src, int x
   lv_obj_t *obj = image(parent, src, x, y);
   lv_image_set_scale(obj, scale);
   return obj;
+}
+
+static lv_obj_t *centered_scaled_image(lv_obj_t *parent, const lv_image_dsc_t *src, int scale) {
+  lv_obj_t *obj = image(parent, src, 0, 0);
+  lv_image_set_scale(obj, scale);
+  lv_obj_center(obj);
+  return obj;
+}
+
+static void set_icon_y(void *obj, int32_t y) {
+  lv_obj_set_y((lv_obj_t *)obj, y);
+}
+
+static void start_icon_idle_animation(void) {
+  lv_anim_t animation;
+  lv_anim_init(&animation);
+  lv_anim_set_var(&animation, chess_launcher.icon);
+  lv_anim_set_exec_cb(&animation, set_icon_y);
+  lv_anim_set_values(&animation,
+                     chess_launcher.resting_y - CHESS_ICON_IDLE_RANGE_Y,
+                     chess_launcher.resting_y + CHESS_ICON_IDLE_RANGE_Y);
+  lv_anim_set_duration(&animation, CHESS_ICON_IDLE_HALF_CYCLE_MS);
+  lv_anim_set_reverse_duration(&animation, CHESS_ICON_IDLE_HALF_CYCLE_MS);
+  lv_anim_set_repeat_count(&animation, LV_ANIM_REPEAT_INFINITE);
+  lv_anim_set_path_cb(&animation, lv_anim_path_ease_in_out);
+  lv_anim_start(&animation);
+}
+
+static void chess_icon_clicked(lv_event_t *event) {
+  if(lv_event_get_code(event) != LV_EVENT_CLICKED || chess_launcher.launch_in_progress) return;
+
+  chess_launcher.launch_in_progress = true;
+  lv_obj_clear_flag(chess_launcher.icon, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_t *home = lv_obj_get_screen(chess_launcher.icon);
+  chess_launcher.icon = NULL;
+  chess_render_smoke_app_create();
+  lv_obj_delete_async(home);
 }
 
 static void draw_bricks(lv_obj_t *screen) {
@@ -235,9 +276,13 @@ static void draw_status_bar(lv_obj_t *screen) {
 }
 
 static void draw_launcher(lv_obj_t *screen) {
-  outlined_rect(screen, CARD_X + CARD_SHADOW_OFFSET, CARD_Y + CARD_SHADOW_OFFSET, CARD_W, CARD_H, 0x7F879B, 0x526078, 4);
-  outlined_rect(screen, CARD_X, CARD_Y, CARD_W, CARD_H, 0xF0F0F3, 0xA8AFBA, 5);
-  scaled_image(screen, &ui_home_chess_updated, CHESS_ICON_X, CHESS_ICON_Y, CHESS_ICON_SCALE);
+  chess_launcher.icon = centered_scaled_image(screen, &ui_home_chess_icon, CHESS_ICON_SCALE);
+  lv_obj_update_layout(chess_launcher.icon);
+  chess_launcher.resting_y = lv_obj_get_y(chess_launcher.icon) + CHESS_ICON_REST_OFFSET_Y;
+  lv_obj_set_y(chess_launcher.icon, chess_launcher.resting_y - CHESS_ICON_IDLE_RANGE_Y);
+  lv_obj_add_flag(chess_launcher.icon, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(chess_launcher.icon, chess_icon_clicked, LV_EVENT_CLICKED, NULL);
+  start_icon_idle_animation();
   label(screen, "Chess", &monogram_32, CHESS_LABEL_X, CHESS_LABEL_Y, CHESS_LABEL_W, CHESS_LABEL_H);
   scaled_image(screen, &ui_home_left_arrow, LEFT_ARROW_X, LEFT_ARROW_Y, ARROW_SCALE);
   scaled_image(screen, &ui_home_right_arrow, RIGHT_ARROW_X, RIGHT_ARROW_Y, ARROW_SCALE);
@@ -246,6 +291,10 @@ static void draw_launcher(lv_obj_t *screen) {
 lv_obj_t *home_screen_create(lv_obj_t *parent) {
   lv_obj_t *screen = parent != NULL ? parent : lv_obj_create(NULL);
   clear_obj(screen);
+  lv_obj_clean(screen);
+  chess_launcher.icon = NULL;
+  chess_launcher.resting_y = 0;
+  chess_launcher.launch_in_progress = false;
   lv_obj_set_size(screen, SCREEN_W, SCREEN_H);
 
   draw_background(screen);
