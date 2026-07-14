@@ -32,6 +32,7 @@ lv_obj_t* mapImage = nullptr;
 
 uint16_t* mapPixels = nullptr;
 lv_image_dsc_t mapImageDsc = {};
+lv_timer_t* quizTimer = nullptr;
 const char* statusText = "";
 uint32_t stateStartTick = 0;
 
@@ -284,5 +285,22 @@ void UsStatesQuizApp::create() {
   lv_obj_set_style_text_align(statusLabel, LV_TEXT_ALIGN_CENTER, 0);
 
   refresh();
-  lv_timer_create(timerEvent, 250, nullptr);
+  quizTimer = lv_timer_create(timerEvent, 250, nullptr);
+}
+
+void UsStatesQuizApp::destroy() {
+  if(quizTimer != nullptr) {
+    lv_timer_del(quizTimer);
+    quizTimer = nullptr;
+  }
+  if(mapPixels != nullptr) {
+    heap_caps_free(mapPixels);
+    mapPixels = nullptr;
+  }
+  mapImageDsc.data = nullptr;
+  mapImage = nullptr;
+  mapArea = nullptr;
+  promptLabel = nullptr;
+  statusLabel = nullptr;
+  timerLabel = nullptr;
 }

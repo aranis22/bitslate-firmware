@@ -38,6 +38,7 @@ lv_obj_t* optionLabels[4] = {};
 uint8_t optionAssetIndexes[4] = {};
 uint8_t currentQuestion = 0;
 bool waitingToAdvance = false;
+lv_timer_t* advanceTimer = nullptr;
 
 lv_color_t color(unsigned int hex) {
   return lv_color_hex(hex);
@@ -138,6 +139,7 @@ void loadQuestion() {
 
 void advanceTimerEvent(lv_timer_t* timer) {
   lv_timer_delete(timer);
+  advanceTimer = nullptr;
   ++currentQuestion;
   loadQuestion();
 }
@@ -156,7 +158,7 @@ void optionEvent(lv_event_t* event) {
     setStatus("Correct!", 0x6CFF83);
     waitingToAdvance = true;
     setButtonEnabled(false);
-    lv_timer_create(advanceTimerEvent, CORRECT_DELAY_MS, nullptr);
+    advanceTimer = lv_timer_create(advanceTimerEvent, CORRECT_DELAY_MS, nullptr);
   } else {
     setStatus("Try Again", 0xF3F6F8);
   }
@@ -228,4 +230,11 @@ void FlagsQuizApp::create() {
   makeOption(screen, 3, BUTTON_X1, BUTTON_Y1, 0xE0B83F);
 
   loadQuestion();
+}
+
+void FlagsQuizApp::destroy() {
+  if(advanceTimer != nullptr) {
+    lv_timer_del(advanceTimer);
+    advanceTimer = nullptr;
+  }
 }

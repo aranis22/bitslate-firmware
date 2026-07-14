@@ -320,3 +320,10 @@ void MassesSpringsApp::create() {
   primeOscillation(true);
   render();
 }
+
+void MassesSpringsApp::destroy() {
+  if(simTimer != nullptr) {
+    lv_timer_del(simTimer);
+    simTimer = nullptr;
+  }
+}

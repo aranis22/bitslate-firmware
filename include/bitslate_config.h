@@ -14,3 +14,7 @@
 
 #define PIN_TOUCH_CS   7
 #define PIN_TOUCH_IRQ  -1
+
+#define PIN_BUTTON_BACK   20
+#define PIN_BUTTON_RIGHT  48
+#define PIN_BUTTON_LEFT   47

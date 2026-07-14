@@ -301,3 +301,11 @@ Later, BitSlate OS should expose a launcher menu:
 - Games
 
 Each app should expose a simple `create()` entry point and keep app logic outside `main.cpp`.
+
+## Current geography apps
+
+`src/apps/geography/us_states_quiz/lvgl/UsStatesQuizApp.cpp` and
+`src/apps/geography/flags_quiz/lvgl/FlagsQuizApp.cpp` are connected through the
+firmware app registry. The US States Quiz uses the portable C++ quiz core and a
+PSRAM-capable raster buffer; the Flags Quiz uses generated flag assets. Both now
+participate in deferred launcher navigation and explicit timer/buffer cleanup.

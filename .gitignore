@@ -11,4 +11,10 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 research/phet-reference/
+build-atom-pio.log
+build-atom-pio.err
+desktop-prototypes/build-atom-python/image.png
+tools/
+src/assets/fonts/*.ttf
+src/assets/fonts/generated/pixel_*.c
 src/apps/geography/us_states_quiz/vector_pipeline/data/

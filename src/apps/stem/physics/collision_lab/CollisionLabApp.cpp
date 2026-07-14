@@ -380,3 +380,10 @@ void CollisionLabApp::create() {
   setPlayButtonActive(false);
   render();
 }
+
+void CollisionLabApp::destroy() {
+  if(simTimer != nullptr) {
+    lv_timer_del(simTimer);
+    simTimer = nullptr;
+  }
+}

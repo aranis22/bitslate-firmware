@@ -1,8 +1,8 @@
 #include "home_screen.h"
 
-#include "apps/games/chess/lvgl/ChessRenderSmokeApp.h"
-#include "apps/geography/us_states_quiz/lvgl/ZoomableWorldMapApp.h"
 #include "assets/UI/home/ui_home_assets.h"
+#include "button_input.h"
+#include "ui/navigation/app_manager.h"
 
 LV_FONT_DECLARE(monogram_16);
 LV_FONT_DECLARE(monogram_20);
@@ -49,7 +49,7 @@ enum {
   BATTERY_X = 400,
   BATTERY_Y = 6,
 
-  CARD_REST_OFFSET_Y = 30,
+  CARD_REST_OFFSET_Y = 23,
   CARD_WIDTH = 220,
   CARD_HEIGHT = 220,
   CARD_VIEWPORT_X = (SCREEN_W - CARD_WIDTH) / 2,
@@ -116,11 +116,20 @@ typedef struct {
 
 static void launch_chess(void);
 static void launch_world_map(void);
+static void launch_physics_menu(void);
+static void launch_chemistry_menu(void);
+static void launch_math_menu(void);
+static void launch_geography_menu(void);
 static void set_strip_x(void *obj, int32_t x);
 
 static const launcher_card_dsc_t launcher_cards[] = {
   {&ui_home_chess_icon, "Chess", launch_chess},
   {&ui_home_world_map_card, "World map", launch_world_map},
+  {&ui_home_physics_card, "Physics", launch_physics_menu},
+  {&ui_home_chemistry_card, "Chemistry", launch_chemistry_menu},
+  {&ui_home_math_card, "Math", launch_math_menu},
+  {&ui_home_geography_card, "Geography", launch_geography_menu},
+  {&ui_home_settings_card, "Settings", NULL},
 };
 
 static launcher_state_t launcher = {0};
@@ -208,11 +217,27 @@ static void stop_card_idle_animation(void) {
 }
 
 static void launch_chess(void) {
-  chess_render_smoke_app_create();
+  app_launch(APP_ID_CHESS);
 }
 
 static void launch_world_map(void) {
-  zoomable_world_map_app_create();
+  app_launch(APP_ID_WORLD_MAP);
+}
+
+static void launch_physics_menu(void) {
+  app_open_menu(APP_MENU_PHYSICS);
+}
+
+static void launch_chemistry_menu(void) {
+  app_open_menu(APP_MENU_CHEMISTRY);
+}
+
+static void launch_math_menu(void) {
+  app_open_menu(APP_MENU_MATH);
+}
+
+static void launch_geography_menu(void) {
+  app_open_menu(APP_MENU_GEOGRAPHY);
 }
 
 static void launcher_card_clicked(lv_event_t *event) {
@@ -225,10 +250,8 @@ static void launcher_card_clicked(lv_event_t *event) {
   launcher.launch_in_progress = true;
   stop_card_idle_animation();
   lv_obj_clear_flag(launcher.viewport, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_t *home = lv_obj_get_screen(launcher.viewport);
   launcher.viewport = NULL;
   card->launch();
-  lv_obj_delete_async(home);
 }
 
 static void update_page_counter(void) {
@@ -250,6 +273,7 @@ static void card_transition_finished(lv_anim_t *animation) {
   update_page_counter();
   lv_obj_invalidate(launcher.viewport);
   start_card_idle_animation();
+  button_input_set_ui_state(UI_STATE_HOME);
 }
 
 static void set_strip_x(void *obj, int32_t x) {
@@ -277,6 +301,7 @@ void home_screen_navigate(int direction) {
   int next_index = ((int)launcher.selected_index + direction + card_count) % card_count;
 
   launcher.transition_in_progress = true;
+  button_input_set_ui_state(UI_STATE_TRANSITIONING);
   launcher.pending_index = (uint32_t)next_index;
   lv_obj_clear_flag(launcher.left_arrow, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_clear_flag(launcher.right_arrow, LV_OBJ_FLAG_CLICKABLE);
@@ -296,9 +321,18 @@ void home_screen_navigate(int direction) {
   }
 }
 
+void home_navigate_left(void) {
+  home_screen_navigate(-1);
+}
+
+void home_navigate_right(void) {
+  home_screen_navigate(1);
+}
+
 static void launcher_arrow_clicked(lv_event_t *event) {
   if(lv_event_get_code(event) != LV_EVENT_CLICKED) return;
-  home_screen_navigate((int)(intptr_t)lv_event_get_user_data(event));
+  if((int)(intptr_t)lv_event_get_user_data(event) > 0) home_navigate_right();
+  else home_navigate_left();
 }
 
 static void draw_bricks(lv_obj_t *screen) {
@@ -423,6 +457,7 @@ lv_obj_t *home_screen_create(lv_obj_t *parent) {
   clear_obj(screen);
   lv_obj_clean(screen);
   launcher = (launcher_state_t){0};
+  button_input_set_ui_state(UI_STATE_HOME);
   lv_obj_set_size(screen, SCREEN_W, SCREEN_H);
 
   draw_background(screen);

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <lvgl.h>
 #include "hal/display/LGFX_BitSlate.hpp"
+#include "ui/screens/button_input.h"
 #include "ui/screens/home_screen.h"
 
 static LGFX_BitSlate display;
@@ -70,6 +71,7 @@ void setup() {
   lv_indev_t* touch = lv_indev_create();
   lv_indev_set_type(touch, LV_INDEV_TYPE_POINTER);
   lv_indev_set_read_cb(touch, lvglTouchRead);
+  button_input_init();
 
   Serial.println("before home_screen_create");
   lv_obj_t* homeScreen = home_screen_create(nullptr);
@@ -88,6 +90,7 @@ void loop() {
   lastTick = now;
 
   lv_timer_handler();
+  button_input_poll(now);
   if (now - lastAlive >= 2000) {
     Serial.println("alive");
     lastAlive = now;

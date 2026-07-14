@@ -5,6 +5,7 @@
 
 #include "ChessGameModel.h"
 #include "assets/images/chess/generated/chess_piece_assets.h"
+#include "ui/screens/button_input.h"
 
 namespace {
 
@@ -260,8 +261,23 @@ void ChessRenderSmokeApp::create() {
   clearInteraction(turnLabel);
 
   createBoard(screen);
+  button_input_register_active_app(screen, UI_STATE_CHESS, chess_render_smoke_app_destroy);
 }
 
 extern "C" void chess_render_smoke_app_create(void) {
   ChessRenderSmokeApp::create();
+}
+
+extern "C" void chess_render_smoke_app_destroy(void) {
+  for (int row = 0; row < 8; ++row) {
+    for (int col = 0; col < 8; ++col) {
+      squareObjs[row][col] = nullptr;
+    }
+  }
+  for (lv_obj_t *&pieceObj : pieceObjs) pieceObj = nullptr;
+  boardObj = nullptr;
+  turnLabel = nullptr;
+  selectedRow = -1;
+  selectedCol = -1;
+  legalMoveCount = 0;
 }

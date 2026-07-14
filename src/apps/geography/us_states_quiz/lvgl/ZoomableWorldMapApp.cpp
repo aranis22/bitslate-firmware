@@ -8,6 +8,7 @@
 
 #include "../core/ZoomableWorldMapCore.h"
 #include "../generated/WorldMapData.h"
+#include "ui/screens/button_input.h"
 
 LV_FONT_DECLARE(monogram_16);
 LV_FONT_DECLARE(monogram_20);
@@ -491,8 +492,32 @@ void ZoomableWorldMapApp::create() {
   refreshLabelsButton();
 
   refreshMapView();
+  button_input_register_active_app(screen, UI_STATE_WORLD_MAP, zoomable_world_map_app_destroy);
 }
 
 extern "C" void zoomable_world_map_app_create(void) {
   ZoomableWorldMapApp::create();
+}
+
+extern "C" void zoomable_world_map_app_destroy(void) {
+  if (mapPixels != nullptr) {
+    heap_caps_free(mapPixels);
+    mapPixels = nullptr;
+  }
+
+  titleLabel = nullptr;
+  statusLabel = nullptr;
+  mapArea = nullptr;
+  mapImage = nullptr;
+  gridButtonLabel = nullptr;
+  labelsButtonLabel = nullptr;
+  for (lv_obj_t *&obj : capitalDots) obj = nullptr;
+  for (lv_obj_t *&obj : capitalLabels) obj = nullptr;
+  for (lv_obj_t *&obj : countryLabels) obj = nullptr;
+  for (lv_obj_t *&obj : oceanLabels) obj = nullptr;
+  mapImageDsc = {};
+  pointerDown = false;
+  dragging = false;
+  dragDistance = 0;
+  bufferStatus = "Map buffer pending";
 }
