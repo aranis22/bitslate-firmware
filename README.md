@@ -58,3 +58,47 @@ The current clean build uses 209,844 / 327,680 bytes of RAM (64.0%) and 2,945,78
 Launcher artwork lives in `src/assets/UI/home`. Export/resize each asset at its final display dimensions before conversion; never scale the card at runtime. Opaque cards are emitted as LVGL 9.5 `LV_COLOR_FORMAT_RGB565` C descriptors. Use `RGB565A8` only for assets that genuinely require transparency.
 
 See [project_context.md](project_context.md) for architecture, lifecycle, app status, and contributor guidance.
+
+## BitBlocks desktop prototype
+
+The frozen BitBlocks v0.1 interaction and visual prototype lives in
+`desktop-prototypes/bitslate_blocks`. It is a standalone Python 3 / PySide6
+application used as the specification for the device-native editor—not as code
+to embed in the firmware.
+
+Implemented desktop features include:
+
+- Permanent left tools/sidebar and right white code workspace (approximately 28/72).
+- Collapsible colored category selector and scrollable Movement, Events,
+  Control, Operators, and Camera palettes.
+- Programmatic pixel-stepped stack, Event hat, reporter, and C-block shapes.
+- Editable argument fields, clone-on-drop palette behavior, movable blocks,
+  basic vertical snapping, linked-stack movement, selection, and deletion.
+- Ctrl-wheel/button zoom, Space or middle-button panning, workspace clearing,
+  and fixed Play/Stop controls (visual only).
+- Strict 3:2 Output Preview with collapsible sprite/backdrop toolbars.
+- Full-screen paged Sprite and Backdrop selectors with four cards per page,
+  selection, Back/Confirm, keyboard/wheel paging, and discrete scrollbars.
+- Default `capybara.png` sprite over `wilderness.png`; Search opens the matching
+  selector, Sparkle randomizes, and Paint remains a placeholder.
+
+Desktop assets are loaded from:
+
+- `src/assets/UI/bitblocks-ui` — toolbar icons
+- `src/assets/UI/sprites` — transparent sprite PNGs
+- `src/assets/UI/backdrops` — 3:2 backdrop PNGs
+- `desktop-prototypes/bitslate_blocks/assets/fonts/monogram.ttf` — bundled font
+
+Run the prototype from the repository root:
+
+```powershell
+cd desktop-prototypes\bitslate_blocks
+python -m pip install -r requirements.txt
+python main.py
+```
+
+The prototype intentionally has no interpreter, generated code, execution
+runtime, variables, persistence, camera behavior, paint behavior, advanced
+C-block nesting, or device/network integration. Play and Stop are not wired to
+execution. See [BITBLOCKS_PORT_SPEC.md](BITBLOCKS_PORT_SPEC.md) for the portable
+model and LVGL port contract.
