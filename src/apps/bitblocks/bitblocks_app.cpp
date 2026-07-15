@@ -694,7 +694,7 @@ void BitBlocksApp::create() {
     lv_obj_clear_flag(image, LV_OBJ_FLAG_CLICKABLE);
     return control;
   };
-  trashControl = imageControl(157, &bitblocks_trash_icon);
+  trashControl = imageControl(6, &bitblocks_trash_icon);
   playButton = imageControl(193, &bitblocks_play_icon);
   stopButton = imageControl(229, &bitblocks_stop_icon);
 }

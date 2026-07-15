@@ -19,7 +19,12 @@ def fitted_rgba(path):
     image.thumbnail((SIZE,SIZE),Image.Resampling.NEAREST)
     canvas=Image.new("RGBA",(SIZE,SIZE),(0,0,0,0))
     canvas.alpha_composite(image,((SIZE-image.width)//2,(SIZE-image.height)//2))
-    return canvas.tobytes()
+    # LVGL's little-endian ARGB8888 descriptor consumes bytes as BGRA.
+    rgba=canvas.tobytes()
+    bgra=bytearray(len(rgba))
+    for i in range(0,len(rgba),4):
+        bgra[i:i+4]=(rgba[i+2],rgba[i+1],rgba[i],rgba[i+3])
+    return bytes(bgra)
 
 def main():
     header=["#pragma once","",'#include "lvgl.h"',""]
