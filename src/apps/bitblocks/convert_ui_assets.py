@@ -7,7 +7,7 @@ HERE = Path(__file__).resolve().parent
 ASSET_DIR = HERE.parents[1] / "assets" / "UI" / "bitblocks-ui"
 OUTPUT_H = HERE / "bitblocks_ui_assets.h"
 OUTPUT_C = HERE / "bitblocks_ui_assets.c"
-ASSETS = ("play", "stop", "trash")
+ASSETS = ("play", "stop", "trash", "capybara_plus", "image", "sparkle", "paint", "search", "view")
 
 def wrap(data, width=16):
     return ",\n".join("    "+",".join(f"0x{v:02x}" for v in data[i:i+width]) for i in range(0,len(data),width))

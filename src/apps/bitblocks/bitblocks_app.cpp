@@ -1,6 +1,8 @@
 #include "bitblocks_app.h"
 #include "block_model.h"
 #include "bitblocks_ui_assets.h"
+#include "../../assets/UI/bitblocks/generated/sprites_64/sprites_64_manifest.h"
+#include "../../assets/UI/bitblocks/generated/backdrops_480x320/backdrops_480x320_manifest.h"
 
 #include <Arduino.h>
 #include <cstdint>
@@ -22,6 +24,36 @@ lv_obj_t* workspace = nullptr;
 lv_obj_t* playButton = nullptr;
 lv_obj_t* stopButton = nullptr;
 lv_obj_t* trashControl = nullptr;
+lv_obj_t* previewPanel = nullptr;
+lv_obj_t* previewBackdrop = nullptr;
+lv_obj_t* previewSprite = nullptr;
+lv_obj_t* spriteToolbar = nullptr;
+lv_obj_t* backdropToolbar = nullptr;
+lv_obj_t* toolbarButtons[2][3] = {};
+lv_obj_t* modalPage = nullptr;
+
+struct MediaAsset { const char* name; const lv_image_dsc_t* image; };
+constexpr MediaAsset sprites[] = {
+  {"astronaut",&bitblocks_sprite_64_astronaut},{"capybara",&bitblocks_sprite_64_capybara},
+  {"car",&bitblocks_sprite_64_car},{"cat",&bitblocks_sprite_64_cat},{"dog",&bitblocks_sprite_64_dog},
+  {"fish",&bitblocks_sprite_64_fish},{"horse",&bitblocks_sprite_64_horse},{"knight",&bitblocks_sprite_64_knight},
+  {"santa",&bitblocks_sprite_64_santa},{"snowman",&bitblocks_sprite_64_snowman},{"ufo",&bitblocks_sprite_64_ufo},
+  {"wizard",&bitblocks_sprite_64_wizard},
+};
+constexpr MediaAsset backdrops[] = {
+  {"city",&bitblocks_backdrop_480x320_city},{"city2",&bitblocks_backdrop_480x320_city2},
+  {"room",&bitblocks_backdrop_480x320_room},{"space",&bitblocks_backdrop_480x320_space},
+  {"space2",&bitblocks_backdrop_480x320_space2},{"space3",&bitblocks_backdrop_480x320_space3},
+  {"underwater",&bitblocks_backdrop_480x320_underwater},{"wilderness",&bitblocks_backdrop_480x320_wilderness},
+  {"wilderness2",&bitblocks_backdrop_480x320_wilderness2},{"wilderness3",&bitblocks_backdrop_480x320_wilderness3},
+  {"woods",&bitblocks_backdrop_480x320_woods},
+};
+constexpr uint8_t kSpriteCount=sizeof(sprites)/sizeof(sprites[0]);
+constexpr uint8_t kBackdropCount=sizeof(backdrops)/sizeof(backdrops[0]);
+uint8_t currentSprite = 1;
+uint8_t currentBackdrop = 7;
+bool spriteToolbarExpanded = false;
+bool backdropToolbarExpanded = false;
 
 enum class Category : uint8_t { Movement, Events, Control, Operators, Camera };
 Category selectedCategory = Category::Movement;
@@ -136,6 +168,121 @@ lv_obj_t* text(lv_obj_t* parent, const char* value, int x, int y, const lv_font_
   lv_obj_clear_flag(label, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_clear_flag(label, LV_OBJ_FLAG_EVENT_BUBBLE);
   lv_obj_set_style_text_font(label, font, 0);lv_obj_set_style_text_color(label, color(ink), 0);return label;
+}
+
+lv_obj_t* image_button(lv_obj_t* parent, int x, int y, const lv_image_dsc_t* source,
+                       lv_event_cb_t callback = nullptr, void* userData = nullptr) {
+  lv_obj_t* button = panel(parent, x, y, 30, 30, 0xFFFFFF, 0xFFFFFF, 0);
+  lv_obj_set_style_bg_opa(button, LV_OPA_TRANSP, 0);
+  lv_obj_t* image = lv_image_create(button);lv_image_set_src(image, source);lv_obj_set_pos(image, -1, -1);
+  lv_obj_clear_flag(image, LV_OBJ_FLAG_CLICKABLE);
+  if(callback != nullptr) {
+    lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE);lv_obj_add_flag(button, LV_OBJ_FLAG_PRESS_LOCK);
+    lv_obj_set_style_opa(button, LV_OPA_60, LV_STATE_PRESSED);
+    lv_obj_add_event_cb(button, callback, LV_EVENT_CLICKED, userData);
+  }
+  return button;
+}
+
+void update_preview_media() {
+  if(previewBackdrop != nullptr) lv_image_set_src(previewBackdrop, backdrops[currentBackdrop].image);
+  if(previewSprite != nullptr) lv_image_set_src(previewSprite, sprites[currentSprite].image);
+}
+
+enum class ModalKind : uint8_t { Sprite, Backdrop, Fullscreen };
+ModalKind modalKind = ModalKind::Sprite;
+uint8_t modalPageIndex = 0;
+uint8_t modalSelection = 0;
+lv_obj_t* modalCards[4] = {};
+
+void close_modal(lv_event_t*) {
+  if(modalPage == nullptr) return;
+  lv_obj_delete(modalPage);modalPage = nullptr;
+}
+
+void render_selector_cards();
+
+void selector_card_clicked(lv_event_t* event) {
+  const uint8_t slot = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event)));
+  modalSelection = modalPageIndex * 4 + slot;render_selector_cards();
+}
+
+void selector_page_change(lv_event_t* event) {
+  const intptr_t direction = reinterpret_cast<intptr_t>(lv_event_get_user_data(event));
+  const uint8_t count = modalKind == ModalKind::Sprite ? kSpriteCount : kBackdropCount;
+  const uint8_t pages = (count + 3) / 4;
+  if(direction < 0 && modalPageIndex > 0) --modalPageIndex;
+  else if(direction > 0 && modalPageIndex + 1 < pages) ++modalPageIndex;
+  else return;
+  render_selector_cards();
+}
+
+void confirm_selector(lv_event_t*) {
+  if(modalKind == ModalKind::Sprite) currentSprite = modalSelection;
+  else currentBackdrop = modalSelection;
+  update_preview_media();close_modal(nullptr);
+}
+
+void render_selector_cards() {
+  if(modalPage == nullptr) return;
+  for(lv_obj_t*& card : modalCards) {if(card != nullptr) lv_obj_delete(card);card = nullptr;}
+  const MediaAsset* assets = modalKind == ModalKind::Sprite ? sprites : backdrops;
+  const uint8_t count = modalKind == ModalKind::Sprite ? kSpriteCount : kBackdropCount;
+  for(uint8_t slot=0;slot<4;++slot) {
+    const uint8_t index=modalPageIndex*4+slot;if(index>=count) break;
+    const int x=8+slot*116;lv_obj_t* card=panel(modalPage,x,62,108,178,0xF4F1F6,index==modalSelection?0xFFE45C:0xB7B1C0,index==modalSelection?4:3);
+    lv_obj_add_flag(card,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(card,selector_card_clicked,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<uintptr_t>(slot)));
+    lv_obj_t* image=lv_image_create(card);lv_image_set_src(image,assets[index].image);lv_obj_clear_flag(image,LV_OBJ_FLAG_CLICKABLE);
+    if(modalKind==ModalKind::Sprite) lv_obj_set_pos(image,22,28);
+    else {lv_image_set_scale(image,51);lv_obj_set_pos(image,(108-480)/2,12+(82-320)/2);}
+    lv_obj_t* label=text(card,assets[index].name,5,143,&monogram_16,0x24202B);lv_obj_set_width(label,98);lv_obj_set_style_text_align(label,LV_TEXT_ALIGN_CENTER,0);
+    modalCards[slot]=card;
+  }
+}
+
+void open_selector(ModalKind kind) {
+  if(modalPage != nullptr) return;
+  modalKind=kind;modalSelection=kind==ModalKind::Sprite?currentSprite:currentBackdrop;modalPageIndex=modalSelection/4;
+  modalPage=panel(root,0,0,480,320,kind==ModalKind::Sprite?0x342057:0x62656B,0,0);lv_obj_move_foreground(modalPage);
+  text(modalPage,kind==ModalKind::Sprite?"SPRITE SELECTOR":"BACKDROP SELECTOR",16,12,&monogram_24,0xFFFFFF);
+  lv_obj_t* back=panel(modalPage,10,270,74,36,0x30384B,0xF2EDF4,3);lv_obj_add_flag(back,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(back,close_modal,LV_EVENT_CLICKED,nullptr);text(back,"< BACK",10,7,&monogram_16,0xFFFFFF);
+  lv_obj_t* confirm=panel(modalPage,374,270,96,36,0x4B843D,0x18271B,3);lv_obj_add_flag(confirm,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(confirm,confirm_selector,LV_EVENT_CLICKED,nullptr);text(confirm,"CONFIRM",13,7,&monogram_16,0xFFFFFF);
+  lv_obj_t* previous=panel(modalPage,175,270,44,36,0xEDEAF0,0x171820,3);lv_obj_add_flag(previous,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(previous,selector_page_change,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<intptr_t>(-1)));text(previous,"<",16,6,&monogram_20,0x171820);
+  lv_obj_t* next=panel(modalPage,261,270,44,36,0xEDEAF0,0x171820,3);lv_obj_add_flag(next,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(next,selector_page_change,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<intptr_t>(1)));text(next,">",16,6,&monogram_20,0x171820);
+  render_selector_cards();
+}
+
+void open_selector_event(lv_event_t* event) {open_selector(static_cast<ModalKind>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event))));}
+
+void randomize_media(lv_event_t* event) {
+  const ModalKind kind=static_cast<ModalKind>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event)));
+  if(kind==ModalKind::Sprite) currentSprite=esp_random()%kSpriteCount;
+  else currentBackdrop=esp_random()%kBackdropCount;
+  update_preview_media();
+}
+
+void toggle_media_toolbar(lv_event_t* event) {
+  const uint8_t toolbarIndex=static_cast<uint8_t>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event)));
+  bool& expanded=toolbarIndex==0?spriteToolbarExpanded:backdropToolbarExpanded;expanded=!expanded;
+  for(lv_obj_t* button:toolbarButtons[toolbarIndex]) if(button!=nullptr) lv_obj_set_flag(button,LV_OBJ_FLAG_HIDDEN,!expanded);
+}
+
+lv_obj_t* create_media_toolbar(lv_obj_t* parent,int x,ModalKind kind,const lv_image_dsc_t* triggerSource) {
+  const uint8_t index=kind==ModalKind::Sprite?0:1;
+  lv_obj_t* toolbar=panel(parent,x,4,30,120,0xFFFFFF,0xFFFFFF,0);lv_obj_set_style_bg_opa(toolbar,LV_OPA_TRANSP,0);
+  toolbarButtons[index][0]=image_button(toolbar,0,0,&bitblocks_sparkle_icon,randomize_media,reinterpret_cast<void*>(static_cast<uintptr_t>(kind)));
+  toolbarButtons[index][1]=image_button(toolbar,0,30,&bitblocks_paint_icon);
+  toolbarButtons[index][2]=image_button(toolbar,0,60,&bitblocks_search_icon,open_selector_event,reinterpret_cast<void*>(static_cast<uintptr_t>(kind)));
+  for(lv_obj_t* button:toolbarButtons[index]) lv_obj_add_flag(button,LV_OBJ_FLAG_HIDDEN);
+  image_button(toolbar,0,90,triggerSource,toggle_media_toolbar,reinterpret_cast<void*>(static_cast<uintptr_t>(index)));
+  return toolbar;
+}
+
+void open_fullscreen(lv_event_t*) {
+  if(modalPage != nullptr) return;modalKind=ModalKind::Fullscreen;modalPage=panel(root,0,0,480,320,0x000000,0,0);lv_obj_move_foreground(modalPage);
+  lv_obj_t* backdrop=lv_image_create(modalPage);lv_image_set_src(backdrop,backdrops[currentBackdrop].image);lv_obj_set_pos(backdrop,0,0);
+  lv_obj_t* sprite=lv_image_create(modalPage);lv_image_set_src(sprite,sprites[currentSprite].image);lv_obj_set_pos(sprite,208,128);
+  lv_obj_t* back=panel(modalPage,10,10,76,38,0x30384B,0xFFFFFF,3);lv_obj_add_flag(back,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(back,close_modal,LV_EVENT_CLICKED,nullptr);text(back,"< BACK",10,8,&monogram_16,0xFFFFFF);
 }
 
 lv_obj_t* create_block_visual(lv_obj_t* parent, int x, int y, int w, uint32_t fill, uint32_t outline,
@@ -707,8 +854,12 @@ void BitBlocksApp::create() {
   categoryLabel = text(categoryHeader, "", 10, 8, &monogram_20, 0xFFFFFF);
   text(categoryHeader, "v", 175, 8, &monogram_20, 0xFFFFFF);
   palette = panel(sidebar, 3, 44, 194, 133, 0x242424, 0x382D27, 3);
-  lv_obj_t* preview = panel(sidebar, 3, 181, 192, 128, 0xFAFAFA, 0x29231F, 3);
-  text(preview, "wilderness + capybara", 26, 51, &monogram_16, 0x30384B);
+  previewPanel = panel(sidebar, 3, 181, 192, 128, 0xFAFAFA, 0x29231F, 3);
+  previewBackdrop=lv_image_create(previewPanel);lv_image_set_src(previewBackdrop,backdrops[currentBackdrop].image);lv_image_set_scale(previewBackdrop,102);lv_obj_set_pos(previewBackdrop,-144,-96);lv_obj_clear_flag(previewBackdrop,LV_OBJ_FLAG_CLICKABLE);
+  previewSprite=lv_image_create(previewPanel);lv_image_set_src(previewSprite,sprites[currentSprite].image);lv_obj_set_pos(previewSprite,64,32);lv_obj_clear_flag(previewSprite,LV_OBJ_FLAG_CLICKABLE);
+  image_button(previewPanel,4,94,&bitblocks_view_icon,open_fullscreen,nullptr);
+  spriteToolbar=create_media_toolbar(previewPanel,128,ModalKind::Sprite,&bitblocks_capybara_plus_icon);
+  backdropToolbar=create_media_toolbar(previewPanel,160,ModalKind::Backdrop,&bitblocks_image_icon);
   update_category_header();
   refresh_palette();
 
@@ -739,6 +890,8 @@ void BitBlocksApp::destroy() {
   playButton = nullptr;
   stopButton = nullptr;
   trashControl = nullptr;
+  previewPanel = nullptr;previewBackdrop = nullptr;previewSprite = nullptr;
+  spriteToolbar = nullptr;backdropToolbar = nullptr;modalPage = nullptr;
   selectedBlock = nullptr;
   selectedPaletteBlock = nullptr;
 }
