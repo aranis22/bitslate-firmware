@@ -6,6 +6,7 @@
 
 #include <Arduino.h>
 #include <cstdint>
+#include <esp_heap_caps.h>
 #include <lvgl.h>
 
 LV_FONT_DECLARE(monogram_16);
@@ -31,6 +32,12 @@ lv_obj_t* spriteToolbar = nullptr;
 lv_obj_t* backdropToolbar = nullptr;
 lv_obj_t* toolbarButtons[2][3] = {};
 lv_obj_t* modalPage = nullptr;
+lv_obj_t* selectorPage = nullptr;
+lv_obj_t* selectorTitle = nullptr;
+lv_obj_t* fullscreenPage = nullptr;
+lv_obj_t* fullscreenBackdrop = nullptr;
+lv_obj_t* fullscreenSprite = nullptr;
+bool modalTransition = false;
 
 struct MediaAsset { const char* name; const lv_image_dsc_t* image; };
 constexpr MediaAsset sprites[] = {
@@ -195,9 +202,24 @@ uint8_t modalPageIndex = 0;
 uint8_t modalSelection = 0;
 lv_obj_t* modalCards[4] = {};
 
+uint32_t object_count(lv_obj_t* object) {
+  if(object == nullptr) return 0;
+  uint32_t count=1;const uint32_t children=lv_obj_get_child_count(object);
+  for(uint32_t i=0;i<children;++i) count+=object_count(lv_obj_get_child(object,i));
+  return count;
+}
+
+void log_selector_memory(const char* stage) {
+  Serial.printf("BitBlocks selector %-20s heap=%u largest=%u psram_free=%u psram_total=%u objects=%u\n",
+                stage,heap_caps_get_free_size(MALLOC_CAP_8BIT),heap_caps_get_largest_free_block(MALLOC_CAP_8BIT),
+                heap_caps_get_free_size(MALLOC_CAP_SPIRAM),heap_caps_get_total_size(MALLOC_CAP_SPIRAM),object_count(root));
+}
+
 void close_modal(lv_event_t*) {
   if(modalPage == nullptr) return;
-  lv_obj_delete(modalPage);modalPage = nullptr;
+  if(modalTransition) return;modalTransition=true;log_selector_memory("before close");
+  lv_obj_add_flag(modalPage,LV_OBJ_FLAG_HIDDEN);modalPage = nullptr;
+  log_selector_memory("after editor return");modalTransition=false;
 }
 
 void render_selector_cards();
@@ -224,13 +246,13 @@ void confirm_selector(lv_event_t*) {
 }
 
 void render_selector_cards() {
-  if(modalPage == nullptr) return;
+  if(selectorPage == nullptr) return;
   for(lv_obj_t*& card : modalCards) {if(card != nullptr) lv_obj_delete(card);card = nullptr;}
   const MediaAsset* assets = modalKind == ModalKind::Sprite ? sprites : backdrops;
   const uint8_t count = modalKind == ModalKind::Sprite ? kSpriteCount : kBackdropCount;
   for(uint8_t slot=0;slot<4;++slot) {
     const uint8_t index=modalPageIndex*4+slot;if(index>=count) break;
-    const int x=8+slot*116;lv_obj_t* card=panel(modalPage,x,62,108,178,0xF4F1F6,index==modalSelection?0xFFE45C:0xB7B1C0,index==modalSelection?4:3);
+    const int x=8+slot*116;lv_obj_t* card=panel(selectorPage,x,62,108,178,0xF4F1F6,index==modalSelection?0xFFE45C:0xB7B1C0,index==modalSelection?4:3);
     lv_obj_add_flag(card,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(card,selector_card_clicked,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<uintptr_t>(slot)));
     lv_obj_t* image=lv_image_create(card);lv_image_set_src(image,assets[index].image);lv_obj_clear_flag(image,LV_OBJ_FLAG_CLICKABLE);
     if(modalKind==ModalKind::Sprite) lv_obj_set_pos(image,22,28);
@@ -238,18 +260,23 @@ void render_selector_cards() {
     lv_obj_t* label=text(card,assets[index].name,5,143,&monogram_16,0x24202B);lv_obj_set_width(label,98);lv_obj_set_style_text_align(label,LV_TEXT_ALIGN_CENTER,0);
     modalCards[slot]=card;
   }
+  log_selector_memory("after cards");
 }
 
 void open_selector(ModalKind kind) {
-  if(modalPage != nullptr) return;
+  if(modalPage != nullptr||modalTransition) return;modalTransition=true;log_selector_memory("before selector open");
   modalKind=kind;modalSelection=kind==ModalKind::Sprite?currentSprite:currentBackdrop;modalPageIndex=modalSelection/4;
-  modalPage=panel(root,0,0,480,320,kind==ModalKind::Sprite?0x342057:0x62656B,0,0);lv_obj_move_foreground(modalPage);
-  text(modalPage,kind==ModalKind::Sprite?"SPRITE SELECTOR":"BACKDROP SELECTOR",16,12,&monogram_24,0xFFFFFF);
-  lv_obj_t* back=panel(modalPage,10,270,74,36,0x30384B,0xF2EDF4,3);lv_obj_add_flag(back,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(back,close_modal,LV_EVENT_CLICKED,nullptr);text(back,"< BACK",10,7,&monogram_16,0xFFFFFF);
-  lv_obj_t* confirm=panel(modalPage,374,270,96,36,0x4B843D,0x18271B,3);lv_obj_add_flag(confirm,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(confirm,confirm_selector,LV_EVENT_CLICKED,nullptr);text(confirm,"CONFIRM",13,7,&monogram_16,0xFFFFFF);
-  lv_obj_t* previous=panel(modalPage,175,270,44,36,0xEDEAF0,0x171820,3);lv_obj_add_flag(previous,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(previous,selector_page_change,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<intptr_t>(-1)));text(previous,"<",16,6,&monogram_20,0x171820);
-  lv_obj_t* next=panel(modalPage,261,270,44,36,0xEDEAF0,0x171820,3);lv_obj_add_flag(next,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(next,selector_page_change,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<intptr_t>(1)));text(next,">",16,6,&monogram_20,0x171820);
-  render_selector_cards();
+  if(selectorPage==nullptr) {
+    selectorPage=panel(root,0,0,480,320,0x342057,0,0);
+    selectorTitle=text(selectorPage,"",16,12,&monogram_24,0xFFFFFF);
+    lv_obj_t* back=panel(selectorPage,10,270,74,36,0x30384B,0xF2EDF4,3);lv_obj_add_flag(back,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(back,close_modal,LV_EVENT_CLICKED,nullptr);text(back,"< BACK",10,7,&monogram_16,0xFFFFFF);
+    lv_obj_t* confirm=panel(selectorPage,374,270,96,36,0x4B843D,0x18271B,3);lv_obj_add_flag(confirm,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(confirm,confirm_selector,LV_EVENT_CLICKED,nullptr);text(confirm,"CONFIRM",13,7,&monogram_16,0xFFFFFF);
+    lv_obj_t* previous=panel(selectorPage,175,270,44,36,0xEDEAF0,0x171820,3);lv_obj_add_flag(previous,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(previous,selector_page_change,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<intptr_t>(-1)));text(previous,"<",16,6,&monogram_20,0x171820);
+    lv_obj_t* next=panel(selectorPage,261,270,44,36,0xEDEAF0,0x171820,3);lv_obj_add_flag(next,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(next,selector_page_change,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<intptr_t>(1)));text(next,">",16,6,&monogram_20,0x171820);
+  }
+  modalPage=selectorPage;lv_obj_clear_flag(selectorPage,LV_OBJ_FLAG_HIDDEN);lv_obj_move_foreground(selectorPage);
+  lv_obj_set_style_bg_color(selectorPage,color(kind==ModalKind::Sprite?0x342057:0x62656B),0);
+  lv_label_set_text(selectorTitle,kind==ModalKind::Sprite?"SPRITE SELECTOR":"BACKDROP SELECTOR");render_selector_cards();modalTransition=false;
 }
 
 void open_selector_event(lv_event_t* event) {open_selector(static_cast<ModalKind>(reinterpret_cast<uintptr_t>(lv_event_get_user_data(event))));}
@@ -279,10 +306,15 @@ lv_obj_t* create_media_toolbar(lv_obj_t* parent,int x,ModalKind kind,const lv_im
 }
 
 void open_fullscreen(lv_event_t*) {
-  if(modalPage != nullptr) return;modalKind=ModalKind::Fullscreen;modalPage=panel(root,0,0,480,320,0x000000,0,0);lv_obj_move_foreground(modalPage);
-  lv_obj_t* backdrop=lv_image_create(modalPage);lv_image_set_src(backdrop,backdrops[currentBackdrop].image);lv_obj_set_pos(backdrop,0,0);
-  lv_obj_t* sprite=lv_image_create(modalPage);lv_image_set_src(sprite,sprites[currentSprite].image);lv_obj_set_pos(sprite,208,128);
-  lv_obj_t* back=panel(modalPage,10,10,76,38,0x30384B,0xFFFFFF,3);lv_obj_add_flag(back,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(back,close_modal,LV_EVENT_CLICKED,nullptr);text(back,"< BACK",10,8,&monogram_16,0xFFFFFF);
+  if(modalPage != nullptr||modalTransition) return;modalTransition=true;modalKind=ModalKind::Fullscreen;
+  if(fullscreenPage==nullptr) {
+    fullscreenPage=panel(root,0,0,480,320,0x000000,0,0);
+    fullscreenBackdrop=lv_image_create(fullscreenPage);lv_obj_set_pos(fullscreenBackdrop,0,0);
+    fullscreenSprite=lv_image_create(fullscreenPage);lv_obj_set_pos(fullscreenSprite,208,128);
+    lv_obj_t* back=panel(fullscreenPage,10,10,76,38,0x30384B,0xFFFFFF,3);lv_obj_add_flag(back,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(back,close_modal,LV_EVENT_CLICKED,nullptr);text(back,"< BACK",10,8,&monogram_16,0xFFFFFF);
+  }
+  modalPage=fullscreenPage;lv_image_set_src(fullscreenBackdrop,backdrops[currentBackdrop].image);lv_image_set_src(fullscreenSprite,sprites[currentSprite].image);
+  lv_obj_clear_flag(fullscreenPage,LV_OBJ_FLAG_HIDDEN);lv_obj_move_foreground(fullscreenPage);modalTransition=false;
 }
 
 lv_obj_t* create_block_visual(lv_obj_t* parent, int x, int y, int w, uint32_t fill, uint32_t outline,
@@ -891,7 +923,9 @@ void BitBlocksApp::destroy() {
   stopButton = nullptr;
   trashControl = nullptr;
   previewPanel = nullptr;previewBackdrop = nullptr;previewSprite = nullptr;
-  spriteToolbar = nullptr;backdropToolbar = nullptr;modalPage = nullptr;
+  spriteToolbar = nullptr;backdropToolbar = nullptr;modalPage = nullptr;selectorPage = nullptr;selectorTitle = nullptr;
+  fullscreenPage = nullptr;fullscreenBackdrop = nullptr;fullscreenSprite = nullptr;
+  for(lv_obj_t*& card:modalCards) card=nullptr;
   selectedBlock = nullptr;
   selectedPaletteBlock = nullptr;
 }
