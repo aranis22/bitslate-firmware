@@ -1,0 +1,15 @@
+#pragma once
+
+#include "lvgl.h"
+
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_city;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_city2;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_room;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_space;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_space2;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_space3;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_underwater;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_wilderness;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_wilderness2;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_wilderness3;
+extern const lv_image_dsc_t bitblocks_backdrop_480x320_woods;
