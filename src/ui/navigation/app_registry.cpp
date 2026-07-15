@@ -11,6 +11,7 @@
 #include "apps/stem/physics/circuit_lab/CircuitLabApp.h"
 #include "apps/stem/physics/collision_lab/CollisionLabApp.h"
 #include "apps/stem/physics/masses_springs/MassesSpringsApp.h"
+#include "apps/bitblocks/bitblocks_app.h"
 
 namespace {
 void start_chess() { chess_render_smoke_app_create(); }
@@ -30,6 +31,7 @@ const app_descriptor_t APPS[] = {
     {APP_ID_SCIENTIFIC_CALCULATOR, "Scientific Calculator", ScientificCalculatorApp::create, nullptr},
     {APP_ID_US_STATES_QUIZ, "US States Quiz", UsStatesQuizApp::create, UsStatesQuizApp::destroy},
     {APP_ID_WORLD_FLAGS_QUIZ, "World Flags Quiz", FlagsQuizApp::create, FlagsQuizApp::destroy},
+    {APP_ID_BITBLOCKS, "BitBlocks", BitBlocksApp::create, BitBlocksApp::destroy},
 };
 }
 

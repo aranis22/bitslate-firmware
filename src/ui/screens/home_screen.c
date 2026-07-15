@@ -120,6 +120,7 @@ static void launch_physics_menu(void);
 static void launch_chemistry_menu(void);
 static void launch_math_menu(void);
 static void launch_geography_menu(void);
+static void launch_bitblocks(void);
 static void set_strip_x(void *obj, int32_t x);
 
 static const launcher_card_dsc_t launcher_cards[] = {
@@ -129,6 +130,7 @@ static const launcher_card_dsc_t launcher_cards[] = {
   {&ui_home_chemistry_card, "Chemistry", launch_chemistry_menu},
   {&ui_home_math_card, "Math", launch_math_menu},
   {&ui_home_geography_card, "Geography", launch_geography_menu},
+  {&ui_home_bitblocks_card, "BitBlocks", launch_bitblocks},
   {&ui_home_settings_card, "Settings", NULL},
 };
 
@@ -238,6 +240,10 @@ static void launch_math_menu(void) {
 
 static void launch_geography_menu(void) {
   app_open_menu(APP_MENU_GEOGRAPHY);
+}
+
+static void launch_bitblocks(void) {
+  app_launch(APP_ID_BITBLOCKS);
 }
 
 static void launcher_card_clicked(lv_event_t *event) {

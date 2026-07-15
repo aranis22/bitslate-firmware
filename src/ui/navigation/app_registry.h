@@ -17,6 +17,7 @@ typedef enum {
   APP_ID_SCIENTIFIC_CALCULATOR,
   APP_ID_US_STATES_QUIZ,
   APP_ID_WORLD_FLAGS_QUIZ,
+  APP_ID_BITBLOCKS,
 } app_id_t;
 
 typedef void (*app_callback_t)(void);

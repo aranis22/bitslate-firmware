@@ -37,7 +37,7 @@ Primary next work:
 
 ## Current launcher
 
-Home contains Chess, World Map, Physics, Chemistry, Math, Geography, and Settings. Physics, Chemistry, Math, and Geography open category menus. Registered leaf apps are declared in `src/ui/navigation/app_registry.cpp` and launched through `src/ui/navigation/app_manager.cpp`.
+Home contains Chess, World Map, Physics, Chemistry, Math, Geography, BitBlocks, and Settings. Physics, Chemistry, Math, and Geography open category menus; BitBlocks is a distinct registered leaf app. Registered leaf apps are declared in `src/ui/navigation/app_registry.cpp` and launched through `src/ui/navigation/app_manager.cpp`.
 
 Connected apps include Chess, World Map, Masses/Springs, Collision, Circuits, Periodic Table, Atom Lab, Graphing Calculator, Scientific Calculator, US States Quiz, and World Flags Quiz. Waves, Kinematics, Forces, and Settings intentionally remain inactive because no matching app implementation is present.
 
