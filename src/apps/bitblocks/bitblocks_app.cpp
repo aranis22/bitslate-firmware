@@ -1,4 +1,5 @@
 #include "bitblocks_app.h"
+#include "block_model.h"
 
 #include <Arduino.h>
 #include <cstdint>
@@ -50,13 +51,7 @@ struct WorkspaceBlock {
   lv_obj_t* selection = nullptr;
   BlockSpec ownedSpec = {};
   const BlockSpec* spec = nullptr;
-  WorkspaceBlock* above = nullptr;
-  WorkspaceBlock* below = nullptr;
-  int dragOffsetX = 0;
-  int dragOffsetY = 0;
-  lv_point_t pressPoint = {};
-  uint32_t pressTick = 0;
-  bool dragging = false;
+  bitblocks::BlockId id = bitblocks::kInvalidBlockId;
   bool active = false;
 };
 
@@ -71,6 +66,7 @@ struct PaletteBlockState {
 
 constexpr int kMaxWorkspaceBlocks = 24;
 WorkspaceBlock workspaceBlocks[kMaxWorkspaceBlocks];
+bitblocks::WorkspaceModel workspaceModel;
 WorkspaceBlock* selectedBlock = nullptr;
 PaletteBlockState paletteBlockStates[4];
 PaletteBlockState* selectedPaletteBlock = nullptr;
@@ -80,6 +76,37 @@ uint8_t paletteSpecCount = 0;
 uint8_t palettePage = 0;
 
 constexpr uint8_t kBlocksPerPage = 3;
+constexpr int kWorkspaceX = 210;
+constexpr int kWorkspaceY = 4;
+constexpr int kWorkspaceWidth = 266;
+constexpr int kWorkspaceHeight = 312;
+constexpr int kStackStep = 31;
+constexpr int kDragThreshold = 6;
+constexpr uint32_t kHoldDelayMs = 120;
+constexpr int kSnapXThreshold = 24;
+constexpr int kSnapYThreshold = 12;
+
+enum class InteractionState : uint8_t {
+  Idle,
+  PressedPalette,
+  DraggingPaletteClone,
+  PressedWorkspace,
+  DraggingWorkspaceBlock,
+};
+
+struct Interaction {
+  InteractionState state = InteractionState::Idle;
+  lv_point_t pressPoint = {};
+  lv_point_t lastPoint = {};
+  uint32_t pressTick = 0;
+  int paletteIndex = -1;
+  bitblocks::BlockId blockId = bitblocks::kInvalidBlockId;
+  lv_obj_t* floating = nullptr;
+  int offsetX = 0;
+  int offsetY = 0;
+};
+
+Interaction interaction;
 
 lv_color_t color(uint32_t hex) { return lv_color_hex(hex); }
 
@@ -91,6 +118,7 @@ void base(lv_obj_t* obj, uint32_t fill, uint32_t border = 0, int borderWidth = 0
   lv_obj_set_style_border_width(obj, borderWidth, 0);
   lv_obj_set_style_radius(obj, 0, 0);
   lv_obj_set_style_pad_all(obj, 0, 0);
+  lv_obj_clear_flag(obj, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_clear_flag(obj, LV_OBJ_FLAG_GESTURE_BUBBLE);
 }
@@ -138,26 +166,29 @@ bool pointer_position(lv_point_t* point) {
   return true;
 }
 
-bool is_in_stack(WorkspaceBlock* rootBlock, WorkspaceBlock* candidate) {
-  for(WorkspaceBlock* block = rootBlock; block != nullptr; block = block->below) {
-    if(block == candidate) return true;
-  }
-  return false;
+WorkspaceBlock* view_for(bitblocks::BlockId id) {
+  if(id < 0 || id >= kMaxWorkspaceBlocks || !workspaceBlocks[id].active) return nullptr;
+  return &workspaceBlocks[id];
 }
 
-void move_stack_by(WorkspaceBlock* block, int dx, int dy) {
-  for(WorkspaceBlock* current = block; current != nullptr; current = current->below) {
-    lv_obj_set_pos(current->object, lv_obj_get_x(current->object) + dx, lv_obj_get_y(current->object) + dy);
-    lv_obj_move_foreground(current->object);
+void sync_chain_views(bitblocks::BlockId rootId) {
+  for(bitblocks::BlockId id = rootId; id != bitblocks::kInvalidBlockId;) {
+    const bitblocks::BlockModel* model = workspaceModel.get(id);
+    WorkspaceBlock* view = view_for(id);
+    if(model == nullptr || view == nullptr) break;
+    lv_obj_set_pos(view->object, model->x, model->y);
+    lv_obj_move_foreground(view->object);
+    id = model->next;
   }
   if(playButton != nullptr) lv_obj_move_foreground(playButton);
   if(stopButton != nullptr) lv_obj_move_foreground(stopButton);
 }
 
 void clear_selection() {
-  if(selectedBlock != nullptr && selectedBlock->selection != nullptr) {
-    lv_obj_delete(selectedBlock->selection);
-    selectedBlock->selection = nullptr;
+  for(WorkspaceBlock& block : workspaceBlocks) {
+    if(block.selection == nullptr) continue;
+    lv_obj_delete(block.selection);
+    block.selection = nullptr;
   }
   if(selectedPaletteBlock != nullptr && selectedPaletteBlock->selection != nullptr) {
     lv_obj_delete(selectedPaletteBlock->selection);
@@ -195,7 +226,13 @@ void select_block(WorkspaceBlock* block) {
   if(selectedBlock == block && selectedPaletteBlock == nullptr) return;
   clear_selection();
   selectedBlock = block;
-  block->selection = create_selection_overlay(block->object, block->spec->width);
+  for(bitblocks::BlockId id = block->id; id != bitblocks::kInvalidBlockId;) {
+    WorkspaceBlock* view = view_for(id);
+    const bitblocks::BlockModel* model = workspaceModel.get(id);
+    if(view == nullptr || model == nullptr) break;
+    view->selection = create_selection_overlay(view->object, view->spec->width);
+    id = model->next;
+  }
 }
 
 void select_palette_block(PaletteBlockState* block) {
@@ -207,69 +244,181 @@ void select_palette_block(PaletteBlockState* block) {
 
 WorkspaceBlock* allocate_workspace_block(const BlockSpec* spec, int x, int y);
 
-void snap_stack(WorkspaceBlock* dragged) {
-  const int draggedX = lv_obj_get_x(dragged->object);
-  const int draggedY = lv_obj_get_y(dragged->object);
-
-  for(WorkspaceBlock& candidate : workspaceBlocks) {
-    if(!candidate.active || is_in_stack(dragged, &candidate)) continue;
-    const int candidateX = lv_obj_get_x(candidate.object);
-    const int candidateY = lv_obj_get_y(candidate.object);
-    if(candidate.below == nullptr && LV_ABS(draggedX - candidateX) <= 24 &&
-       LV_ABS(draggedY - (candidateY + 31)) <= 12) {
-      const int dx = candidateX - draggedX;
-      const int dy = candidateY + 31 - draggedY;
-      candidate.below = dragged;
-      dragged->above = &candidate;
-      move_stack_by(dragged, dx, dy);
+void snap_stack(bitblocks::BlockId draggedId) {
+  bitblocks::BlockModel* dragged = workspaceModel.get(draggedId);
+  if(dragged == nullptr) return;
+  for(int id = 0; id < kMaxWorkspaceBlocks; ++id) {
+    bitblocks::BlockModel* candidate = workspaceModel.get(static_cast<bitblocks::BlockId>(id));
+    if(candidate == nullptr || workspaceModel.chainContains(draggedId, candidate->id)) continue;
+    if(candidate->next == bitblocks::kInvalidBlockId &&
+       LV_ABS(dragged->x - candidate->x) <= kSnapXThreshold &&
+       LV_ABS(dragged->y - (candidate->y + kStackStep)) <= kSnapYThreshold) {
+      const int dx = candidate->x - dragged->x;
+      const int dy = candidate->y + kStackStep - dragged->y;
+      if(workspaceModel.connect(candidate->id, draggedId)) {
+        workspaceModel.moveChain(draggedId, dx, dy);
+        sync_chain_views(draggedId);
+      }
       return;
     }
   }
 
-  WorkspaceBlock* bottom = dragged;
-  while(bottom->below != nullptr) bottom = bottom->below;
-  const int bottomX = lv_obj_get_x(bottom->object);
-  const int bottomY = lv_obj_get_y(bottom->object);
-  for(WorkspaceBlock& candidate : workspaceBlocks) {
-    if(!candidate.active || candidate.above != nullptr || is_in_stack(dragged, &candidate)) continue;
-    const int candidateX = lv_obj_get_x(candidate.object);
-    const int candidateY = lv_obj_get_y(candidate.object);
-    if(LV_ABS(bottomX - candidateX) <= 24 && LV_ABS(candidateY - (bottomY + 31)) <= 12) {
-      bottom->below = &candidate;
-      candidate.above = bottom;
-      move_stack_by(&candidate, bottomX - candidateX, bottomY + 31 - candidateY);
+  const bitblocks::BlockId tailId = workspaceModel.tail(draggedId);
+  bitblocks::BlockModel* tail = workspaceModel.get(tailId);
+  if(tail == nullptr) return;
+  for(int id = 0; id < kMaxWorkspaceBlocks; ++id) {
+    bitblocks::BlockModel* candidate = workspaceModel.get(static_cast<bitblocks::BlockId>(id));
+    if(candidate == nullptr || candidate->previous != bitblocks::kInvalidBlockId ||
+       workspaceModel.chainContains(draggedId, candidate->id)) continue;
+    if(LV_ABS(tail->x - candidate->x) <= kSnapXThreshold &&
+       LV_ABS(candidate->y - (tail->y + kStackStep)) <= kSnapYThreshold) {
+      if(workspaceModel.connect(tailId, candidate->id)) {
+        workspaceModel.moveChain(candidate->id, tail->x - candidate->x,
+                                  tail->y + kStackStep - candidate->y);
+        sync_chain_views(candidate->id);
+      }
       return;
     }
   }
+}
+
+bool moved_beyond_threshold(const lv_point_t& point) {
+  return LV_ABS(point.x - interaction.pressPoint.x) >= kDragThreshold ||
+         LV_ABS(point.y - interaction.pressPoint.y) >= kDragThreshold;
+}
+
+bool inside_workspace(const lv_point_t& point) {
+  lv_area_t area;
+  lv_obj_get_coords(workspace, &area);
+  return point.x >= area.x1 && point.x <= area.x2 && point.y >= area.y1 && point.y <= area.y2;
+}
+
+void workspace_local(const lv_point_t& point, int* x, int* y) {
+  lv_area_t area;
+  lv_obj_get_coords(workspace, &area);
+  *x = point.x - area.x1;
+  *y = point.y - area.y1;
+}
+
+void reset_interaction() {
+  if(interaction.floating != nullptr) lv_obj_delete(interaction.floating);
+  interaction = Interaction{};
+}
+
+void update_palette_drag(const lv_point_t& point) {
+  if(interaction.paletteIndex < 0 || interaction.paletteIndex >= paletteSpecCount) return;
+  const BlockSpec& spec = paletteSpecs[interaction.paletteIndex];
+  if(interaction.state == InteractionState::PressedPalette) {
+    if(lv_tick_elaps(interaction.pressTick) < kHoldDelayMs || !moved_beyond_threshold(point)) return;
+    interaction.state = InteractionState::DraggingPaletteClone;
+    interaction.offsetX = spec.width / 2;
+    interaction.offsetY = 18;
+    interaction.floating = create_block_visual(root, point.x - interaction.offsetX, point.y - interaction.offsetY,
+                                                spec.width, spec.fill, spec.outline, 0xD9DBE3, spec.label);
+    lv_obj_clear_flag(interaction.floating, LV_OBJ_FLAG_CLICKABLE);
+  }
+  if(interaction.state == InteractionState::DraggingPaletteClone && interaction.floating != nullptr) {
+    lv_obj_set_pos(interaction.floating, point.x - interaction.offsetX, point.y - interaction.offsetY);
+    lv_obj_move_foreground(interaction.floating);
+  }
+}
+
+void update_workspace_drag(const lv_point_t& point) {
+  bitblocks::BlockModel* model = workspaceModel.get(interaction.blockId);
+  WorkspaceBlock* view = view_for(interaction.blockId);
+  if(model == nullptr || view == nullptr) return;
+  if(interaction.state == InteractionState::PressedWorkspace) {
+    if(lv_tick_elaps(interaction.pressTick) < kHoldDelayMs || !moved_beyond_threshold(point)) return;
+    workspaceModel.detachPrevious(interaction.blockId);
+    interaction.state = InteractionState::DraggingWorkspaceBlock;
+  }
+  if(interaction.state != InteractionState::DraggingWorkspaceBlock) return;
+  int localX, localY;
+  workspace_local(point, &localX, &localY);
+  int targetX = localX - interaction.offsetX;
+  int targetY = localY - interaction.offsetY;
+  targetX = LV_CLAMP(2, targetX, kWorkspaceWidth - view->spec->width - 2);
+  int chainHeight = 37;
+  const bitblocks::BlockId tailId = workspaceModel.tail(interaction.blockId);
+  const bitblocks::BlockModel* tail = workspaceModel.get(tailId);
+  if(tail != nullptr) chainHeight += tail->y - model->y;
+  targetY = LV_CLAMP(2, targetY, kWorkspaceHeight - chainHeight - 2);
+  workspaceModel.moveChain(interaction.blockId, targetX - model->x, targetY - model->y);
+  sync_chain_views(interaction.blockId);
+  interaction.lastPoint = point;
 }
 
 void workspace_block_event(lv_event_t* event) {
   WorkspaceBlock* block = static_cast<WorkspaceBlock*>(lv_event_get_user_data(event));
-  if(lv_event_get_code(event) == LV_EVENT_PRESSED) select_block(block);
+  const lv_event_code_t code = lv_event_get_code(event);
+  lv_point_t point;
+  if(!pointer_position(&point)) return;
+  if(code == LV_EVENT_PRESSED) {
+    select_block(block);
+    interaction = Interaction{};
+    interaction.state = InteractionState::PressedWorkspace;
+    interaction.blockId = block->id;
+    interaction.pressPoint = point;
+    interaction.lastPoint = point;
+    interaction.pressTick = lv_tick_get();
+    interaction.offsetX = point.x - (kWorkspaceX + lv_obj_get_x(block->object));
+    interaction.offsetY = point.y - (kWorkspaceY + lv_obj_get_y(block->object));
+  } else if(code == LV_EVENT_PRESSING) {
+    update_workspace_drag(point);
+  } else if(code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST) {
+    if(interaction.state == InteractionState::DraggingWorkspaceBlock) snap_stack(interaction.blockId);
+    interaction = Interaction{};
+  }
 }
 
 WorkspaceBlock* allocate_workspace_block(const BlockSpec* spec, int x, int y) {
-  for(WorkspaceBlock& block : workspaceBlocks) {
-    if(block.active) continue;
+  const bitblocks::BlockId id = workspaceModel.create(x, y);
+  if(id == bitblocks::kInvalidBlockId) return nullptr;
+  WorkspaceBlock& block = workspaceBlocks[id];
     block = WorkspaceBlock{};
     block.active = true;
+    block.id = id;
     block.ownedSpec = *spec;
     block.spec = &block.ownedSpec;
     block.object = create_block_visual(workspace, x, y, spec->width, spec->fill, spec->outline, 0xFFFFFF, spec->label);
     lv_obj_add_flag(block.object, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(block.object, LV_OBJ_FLAG_PRESS_LOCK);
     lv_obj_set_ext_click_area(block.object, 5);
-    lv_obj_add_event_cb(block.object, workspace_block_event, LV_EVENT_PRESSED, &block);
+    lv_obj_add_event_cb(block.object, workspace_block_event, LV_EVENT_ALL, &block);
     return &block;
-  }
-  return nullptr;
 }
 
-void empty_space_pressed(lv_event_t*) { clear_selection(); }
+void empty_space_pressed(lv_event_t* event) {
+  if(lv_event_get_target(event) == workspace) clear_selection();
+}
 
-void palette_pressed(lv_event_t*) {
+void palette_pressed(lv_event_t* event) {
+  const lv_event_code_t code = lv_event_get_code(event);
   lv_point_t raw;
   if(!pointer_position(&raw)) return;
+
+  if(code == LV_EVENT_PRESSING) {
+    update_palette_drag(raw);
+    return;
+  }
+  if(code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST) {
+    if(interaction.state == InteractionState::DraggingPaletteClone && inside_workspace(raw) &&
+       interaction.paletteIndex >= 0 && interaction.paletteIndex < paletteSpecCount) {
+      int localX, localY;
+      workspace_local(raw, &localX, &localY);
+      const BlockSpec& spec = paletteSpecs[interaction.paletteIndex];
+      localX = LV_CLAMP(2, localX - interaction.offsetX, kWorkspaceWidth - spec.width - 2);
+      localY = LV_CLAMP(2, localY - interaction.offsetY, kWorkspaceHeight - 39);
+      WorkspaceBlock* placed = allocate_workspace_block(&spec, localX, localY);
+      if(placed != nullptr) {
+        select_block(placed);
+        snap_stack(placed->id);
+      }
+    }
+    reset_interaction();
+    return;
+  }
+  if(code != LV_EVENT_PRESSED) return;
 
   lv_area_t paletteArea;
   lv_obj_get_coords(palette, &paletteArea);
@@ -283,6 +432,12 @@ void palette_pressed(lv_event_t*) {
     selectedIndex = palettePage * kBlocksPerPage + matchedRow;
     if(selectedIndex < paletteSpecCount && paletteBlockStates[selectedIndex].object != nullptr) {
       select_palette_block(&paletteBlockStates[selectedIndex]);
+      interaction = Interaction{};
+      interaction.state = InteractionState::PressedPalette;
+      interaction.paletteIndex = selectedIndex;
+      interaction.pressPoint = raw;
+      interaction.lastPoint = raw;
+      interaction.pressTick = lv_tick_get();
     } else {
       selectedIndex = -1;
       clear_selection();
@@ -379,7 +534,7 @@ void render_palette_page() {
   lv_obj_add_flag(paletteInputLayer, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_flag(paletteInputLayer, LV_OBJ_FLAG_PRESS_LOCK);
   lv_obj_clear_flag(paletteInputLayer, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_add_event_cb(paletteInputLayer, palette_pressed, LV_EVENT_PRESSED, nullptr);
+  lv_obj_add_event_cb(paletteInputLayer, palette_pressed, LV_EVENT_ALL, nullptr);
   create_palette_scrollwheel();
 }
 
@@ -463,6 +618,8 @@ void toggle_category_dropdown(lv_event_t*) {
 
 void BitBlocksApp::create() {
   for(WorkspaceBlock& block : workspaceBlocks) block = WorkspaceBlock{};
+  workspaceModel.reset();
+  interaction = Interaction{};
   selectedBlock = nullptr;
   selectedPaletteBlock = nullptr;
   root = lv_obj_create(nullptr);base(root, 0xD9DBE3);lv_obj_set_size(root, 480, 320);lv_screen_load(root);
@@ -479,7 +636,7 @@ void BitBlocksApp::create() {
   update_category_header();
   refresh_palette();
 
-  workspace = panel(root, 210, 4, 266, 312, 0xFFFFFF, 0x34302D, 2);
+  workspace = panel(root, kWorkspaceX, kWorkspaceY, kWorkspaceWidth, kWorkspaceHeight, 0xFFFFFF, 0x34302D, 2);
   lv_obj_add_flag(workspace, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_event_cb(workspace, empty_space_pressed, LV_EVENT_PRESSED, nullptr);
   playButton = panel(workspace, 194, 266, 28, 36, 0x4B843D, 0x171820, 3);
