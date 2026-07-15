@@ -51,6 +51,8 @@ struct BlockSpec {
 struct WorkspaceBlock {
   lv_obj_t* object = nullptr;
   lv_obj_t* selection = nullptr;
+  lv_obj_t* notchTop = nullptr;
+  lv_obj_t* notchInner = nullptr;
   BlockSpec ownedSpec = {};
   const BlockSpec* spec = nullptr;
   bitblocks::BlockId id = bitblocks::kInvalidBlockId;
@@ -137,7 +139,8 @@ lv_obj_t* text(lv_obj_t* parent, const char* value, int x, int y, const lv_font_
 }
 
 lv_obj_t* create_block_visual(lv_obj_t* parent, int x, int y, int w, uint32_t fill, uint32_t outline,
-                              uint32_t surrounding, const char* label) {
+                              uint32_t surrounding, const char* label, lv_obj_t** notchTop = nullptr,
+                              lv_obj_t** notchInner = nullptr) {
   // Build the silhouette from integer-aligned rectangles.  The dark union is
   // the outline; smaller fill pieces create stepped/chamfered ends without
   // introducing internal seams or an external shadow.
@@ -149,11 +152,13 @@ lv_obj_t* create_block_visual(lv_obj_t* parent, int x, int y, int w, uint32_t fi
   panel(block, 3, 7, w - 6, 17, fill, fill, 0);
 
   // Shared inward top notch and outward bottom connector.
-  panel(block, 20, 0, 25, 6, surrounding, surrounding, 0);
+  lv_obj_t* topFill = panel(block, 20, 0, 25, 6, surrounding, surrounding, 0);
   panel(block, 20, 4, 4, 4, outline, outline, 0);
   panel(block, 41, 4, 4, 4, outline, outline, 0);
   panel(block, 24, 5, 17, 3, outline, outline, 0);
-  panel(block, 25, 5, 15, 2, surrounding, surrounding, 0);
+  lv_obj_t* innerFill = panel(block, 25, 5, 15, 2, surrounding, surrounding, 0);
+  if(notchTop != nullptr) *notchTop = topFill;
+  if(notchInner != nullptr) *notchInner = innerFill;
   panel(block, 24, 27, 22, 9, outline, outline, 0);
   panel(block, 27, 27, 16, 6, fill, fill, 0);
 
@@ -171,6 +176,27 @@ bool pointer_position(lv_point_t* point) {
 WorkspaceBlock* view_for(bitblocks::BlockId id) {
   if(id < 0 || id >= kMaxWorkspaceBlocks || !workspaceBlocks[id].active) return nullptr;
   return &workspaceBlocks[id];
+}
+
+void set_notch_color(WorkspaceBlock* view, uint32_t fill) {
+  if(view == nullptr) return;
+  for(lv_obj_t* part : {view->notchTop, view->notchInner}) {
+    if(part == nullptr) continue;
+    lv_obj_set_style_bg_color(part, color(fill), 0);
+    lv_obj_set_style_border_color(part, color(fill), 0);
+  }
+}
+
+void refresh_workspace_notch(bitblocks::BlockId id) {
+  WorkspaceBlock* view = view_for(id);
+  const bitblocks::BlockModel* model = workspaceModel.get(id);
+  if(view == nullptr || model == nullptr) return;
+  uint32_t notchFill = 0xFFFFFF;
+  if(model->previous != bitblocks::kInvalidBlockId) {
+    WorkspaceBlock* previous = view_for(model->previous);
+    if(previous != nullptr && previous->spec != nullptr) notchFill = previous->spec->fill;
+  }
+  set_notch_color(view, notchFill);
 }
 
 void sync_chain_views(bitblocks::BlockId rootId) {
@@ -260,6 +286,7 @@ void snap_stack(bitblocks::BlockId draggedId) {
       const int dy = candidate->y + kStackStep - dragged->y;
       if(workspaceModel.connect(candidate->id, draggedId)) {
         workspaceModel.moveChain(draggedId, dx, dy);
+        refresh_workspace_notch(draggedId);
         sync_chain_views(draggedId);
       }
       return;
@@ -278,6 +305,7 @@ void snap_stack(bitblocks::BlockId draggedId) {
       if(workspaceModel.connect(tailId, candidate->id)) {
         workspaceModel.moveChain(candidate->id, tail->x - candidate->x,
                                   tail->y + kStackStep - candidate->y);
+        refresh_workspace_notch(candidate->id);
         sync_chain_views(candidate->id);
       }
       return;
@@ -367,6 +395,7 @@ void update_workspace_drag(const lv_point_t& point) {
   if(interaction.state == InteractionState::PressedWorkspace) {
     if(lv_tick_elaps(interaction.pressTick) < kHoldDelayMs || !moved_beyond_threshold(point)) return;
     workspaceModel.detachPrevious(interaction.blockId);
+    refresh_workspace_notch(interaction.blockId);
     interaction.state = InteractionState::DraggingWorkspaceBlock;
   }
   if(interaction.state != InteractionState::DraggingWorkspaceBlock) return;
@@ -422,7 +451,8 @@ WorkspaceBlock* allocate_workspace_block(const BlockSpec* spec, int x, int y) {
     block.id = id;
     block.ownedSpec = *spec;
     block.spec = &block.ownedSpec;
-    block.object = create_block_visual(workspace, x, y, spec->width, spec->fill, spec->outline, 0xFFFFFF, spec->label);
+    block.object = create_block_visual(workspace, x, y, spec->width, spec->fill, spec->outline, 0xFFFFFF,
+                                       spec->label, &block.notchTop, &block.notchInner);
     lv_obj_add_flag(block.object, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(block.object, LV_OBJ_FLAG_PRESS_LOCK);
     lv_obj_set_ext_click_area(block.object, 5);
