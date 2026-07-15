@@ -41,19 +41,19 @@ bool modalTransition = false;
 
 struct MediaAsset { const char* name; const lv_image_dsc_t* image; };
 constexpr MediaAsset sprites[] = {
-  {"astronaut",&bitblocks_sprite_64_astronaut},{"capybara",&bitblocks_sprite_64_capybara},
-  {"car",&bitblocks_sprite_64_car},{"cat",&bitblocks_sprite_64_cat},{"dog",&bitblocks_sprite_64_dog},
-  {"fish",&bitblocks_sprite_64_fish},{"horse",&bitblocks_sprite_64_horse},{"knight",&bitblocks_sprite_64_knight},
-  {"santa",&bitblocks_sprite_64_santa},{"snowman",&bitblocks_sprite_64_snowman},{"ufo",&bitblocks_sprite_64_ufo},
-  {"wizard",&bitblocks_sprite_64_wizard},
+  {"Astronaut",&bitblocks_sprite_64_astronaut},{"Capybara",&bitblocks_sprite_64_capybara},
+  {"Car",&bitblocks_sprite_64_car},{"Cat",&bitblocks_sprite_64_cat},{"Dog",&bitblocks_sprite_64_dog},
+  {"Fish",&bitblocks_sprite_64_fish},{"Horse",&bitblocks_sprite_64_horse},{"Knight",&bitblocks_sprite_64_knight},
+  {"Santa",&bitblocks_sprite_64_santa},{"Snowman",&bitblocks_sprite_64_snowman},{"UFO",&bitblocks_sprite_64_ufo},
+  {"Wizard",&bitblocks_sprite_64_wizard},
 };
 constexpr MediaAsset backdrops[] = {
-  {"city",&bitblocks_backdrop_480x320_city},{"city2",&bitblocks_backdrop_480x320_city2},
-  {"room",&bitblocks_backdrop_480x320_room},{"space",&bitblocks_backdrop_480x320_space},
-  {"space2",&bitblocks_backdrop_480x320_space2},{"space3",&bitblocks_backdrop_480x320_space3},
-  {"underwater",&bitblocks_backdrop_480x320_underwater},{"wilderness",&bitblocks_backdrop_480x320_wilderness},
-  {"wilderness2",&bitblocks_backdrop_480x320_wilderness2},{"wilderness3",&bitblocks_backdrop_480x320_wilderness3},
-  {"woods",&bitblocks_backdrop_480x320_woods},
+  {"City",&bitblocks_backdrop_480x320_city},{"City 2",&bitblocks_backdrop_480x320_city2},
+  {"Room",&bitblocks_backdrop_480x320_room},{"Space",&bitblocks_backdrop_480x320_space},
+  {"Space 2",&bitblocks_backdrop_480x320_space2},{"Space 3",&bitblocks_backdrop_480x320_space3},
+  {"Underwater",&bitblocks_backdrop_480x320_underwater},{"Wilderness",&bitblocks_backdrop_480x320_wilderness},
+  {"Wilderness 2",&bitblocks_backdrop_480x320_wilderness2},{"Wilderness 3",&bitblocks_backdrop_480x320_wilderness3},
+  {"Woods",&bitblocks_backdrop_480x320_woods},
 };
 constexpr uint8_t kSpriteCount=sizeof(sprites)/sizeof(sprites[0]);
 constexpr uint8_t kBackdropCount=sizeof(backdrops)/sizeof(backdrops[0]);
@@ -178,10 +178,12 @@ lv_obj_t* text(lv_obj_t* parent, const char* value, int x, int y, const lv_font_
 }
 
 lv_obj_t* image_button(lv_obj_t* parent, int x, int y, const lv_image_dsc_t* source,
-                       lv_event_cb_t callback = nullptr, void* userData = nullptr) {
+                       lv_event_cb_t callback = nullptr, void* userData = nullptr,
+                       uint16_t imageScale = LV_SCALE_NONE) {
   lv_obj_t* button = panel(parent, x, y, 30, 30, 0xFFFFFF, 0xFFFFFF, 0);
   lv_obj_set_style_bg_opa(button, LV_OPA_TRANSP, 0);
   lv_obj_t* image = lv_image_create(button);lv_image_set_src(image, source);lv_obj_set_pos(image, -1, -1);
+  lv_image_set_scale(image, imageScale);
   lv_obj_clear_flag(image, LV_OBJ_FLAG_CLICKABLE);
   if(callback != nullptr) {
     lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE);lv_obj_add_flag(button, LV_OBJ_FLAG_PRESS_LOCK);
@@ -250,14 +252,30 @@ void render_selector_cards() {
   for(lv_obj_t*& card : modalCards) {if(card != nullptr) lv_obj_delete(card);card = nullptr;}
   const MediaAsset* assets = modalKind == ModalKind::Sprite ? sprites : backdrops;
   const uint8_t count = modalKind == ModalKind::Sprite ? kSpriteCount : kBackdropCount;
+  const bool backdropCards = modalKind == ModalKind::Backdrop;
+  const int cardWidth = backdropCards ? 100 : 108;
+  const int cardHeight = backdropCards ? 194 : 178;
+  const int cardX = backdropCards ? 16 : 8;
+  const int cardStep = backdropCards ? 116 : 116;
+  const int cardY = backdropCards ? 52 : 62;
   for(uint8_t slot=0;slot<4;++slot) {
     const uint8_t index=modalPageIndex*4+slot;if(index>=count) break;
-    const int x=8+slot*116;lv_obj_t* card=panel(selectorPage,x,62,108,178,0xF4F1F6,index==modalSelection?0xFFE45C:0xB7B1C0,index==modalSelection?4:3);
+    const int x=cardX+slot*cardStep;lv_obj_t* card=panel(selectorPage,x,cardY,cardWidth,cardHeight,0xF4F1F6,index==modalSelection?0xFFE45C:0xB7B1C0,index==modalSelection?4:3);
     lv_obj_add_flag(card,LV_OBJ_FLAG_CLICKABLE);lv_obj_add_event_cb(card,selector_card_clicked,LV_EVENT_CLICKED,reinterpret_cast<void*>(static_cast<uintptr_t>(slot)));
     lv_obj_t* image=lv_image_create(card);lv_image_set_src(image,assets[index].image);lv_obj_clear_flag(image,LV_OBJ_FLAG_CLICKABLE);
     if(modalKind==ModalKind::Sprite) lv_obj_set_pos(image,22,28);
-    else {lv_image_set_scale(image,51);lv_obj_set_pos(image,(108-480)/2,12+(82-320)/2);}
-    lv_obj_t* label=text(card,assets[index].name,5,143,&monogram_16,0x24202B);lv_obj_set_width(label,98);lv_obj_set_style_text_align(label,LV_TEXT_ALIGN_CENTER,0);
+    else {
+      constexpr int kBackdropScale = 51;
+      constexpr int kScaledBackdropWidth = (480 * kBackdropScale) / LV_SCALE_NONE;
+      lv_image_set_pivot(image,0,0);lv_image_set_scale(image,kBackdropScale);
+      lv_obj_set_pos(image,(cardWidth-kScaledBackdropWidth)/2,24);
+    }
+    const int labelY=backdropCards?153:143;
+    lv_obj_t* label=text(card,assets[index].name,4,labelY,&monogram_20,0x24202B);
+    lv_obj_set_width(label,cardWidth-8);lv_obj_set_style_text_align(label,LV_TEXT_ALIGN_CENTER,0);
+    lv_obj_set_style_text_outline_stroke_color(label,color(0x24202B),0);
+    lv_obj_set_style_text_outline_stroke_width(label,1,0);
+    lv_obj_set_style_text_outline_stroke_opa(label,LV_OPA_COVER,0);
     modalCards[slot]=card;
   }
   log_selector_memory("after cards");
@@ -297,9 +315,10 @@ void toggle_media_toolbar(lv_event_t* event) {
 lv_obj_t* create_media_toolbar(lv_obj_t* parent,int x,ModalKind kind,const lv_image_dsc_t* triggerSource) {
   const uint8_t index=kind==ModalKind::Sprite?0:1;
   lv_obj_t* toolbar=panel(parent,x,4,30,120,0xFFFFFF,0xFFFFFF,0);lv_obj_set_style_bg_opa(toolbar,LV_OPA_TRANSP,0);
-  toolbarButtons[index][0]=image_button(toolbar,0,0,&bitblocks_sparkle_icon,randomize_media,reinterpret_cast<void*>(static_cast<uintptr_t>(kind)));
-  toolbarButtons[index][1]=image_button(toolbar,0,30,&bitblocks_paint_icon);
-  toolbarButtons[index][2]=image_button(toolbar,0,60,&bitblocks_search_icon,open_selector_event,reinterpret_cast<void*>(static_cast<uintptr_t>(kind)));
+  constexpr uint16_t kToolbarIconScale = 218; // 85% of the original artwork.
+  toolbarButtons[index][0]=image_button(toolbar,0,0,&bitblocks_sparkle_icon,randomize_media,reinterpret_cast<void*>(static_cast<uintptr_t>(kind)),kToolbarIconScale);
+  toolbarButtons[index][1]=image_button(toolbar,0,30,&bitblocks_paint_icon,nullptr,nullptr,kToolbarIconScale);
+  toolbarButtons[index][2]=image_button(toolbar,0,60,&bitblocks_search_icon,open_selector_event,reinterpret_cast<void*>(static_cast<uintptr_t>(kind)),kToolbarIconScale);
   for(lv_obj_t* button:toolbarButtons[index]) lv_obj_add_flag(button,LV_OBJ_FLAG_HIDDEN);
   image_button(toolbar,0,90,triggerSource,toggle_media_toolbar,reinterpret_cast<void*>(static_cast<uintptr_t>(index)));
   return toolbar;
