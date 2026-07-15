@@ -1,5 +1,6 @@
 #include "bitblocks_app.h"
 #include "block_model.h"
+#include "bitblocks_ui_assets.h"
 
 #include <Arduino.h>
 #include <cstdint>
@@ -20,6 +21,7 @@ lv_obj_t* categoryDropdown = nullptr;
 lv_obj_t* workspace = nullptr;
 lv_obj_t* playButton = nullptr;
 lv_obj_t* stopButton = nullptr;
+lv_obj_t* trashControl = nullptr;
 
 enum class Category : uint8_t { Movement, Events, Control, Operators, Camera };
 Category selectedCategory = Category::Movement;
@@ -182,6 +184,7 @@ void sync_chain_views(bitblocks::BlockId rootId) {
   }
   if(playButton != nullptr) lv_obj_move_foreground(playButton);
   if(stopButton != nullptr) lv_obj_move_foreground(stopButton);
+  if(trashControl != nullptr) lv_obj_move_foreground(trashControl);
 }
 
 void clear_selection() {
@@ -293,6 +296,40 @@ bool inside_workspace(const lv_point_t& point) {
   return point.x >= area.x1 && point.x <= area.x2 && point.y >= area.y1 && point.y <= area.y2;
 }
 
+bool inside_trash(const lv_point_t& point) {
+  if(trashControl == nullptr) return false;
+  lv_area_t area;
+  lv_obj_get_coords(trashControl, &area);
+  return point.x >= area.x1 && point.x <= area.x2 && point.y >= area.y1 && point.y <= area.y2;
+}
+
+void set_trash_active(bool active) {
+  if(trashControl == nullptr) return;
+  lv_obj_set_style_outline_width(trashControl, active ? 3 : 0, 0);
+  lv_obj_set_style_outline_color(trashControl, color(0xFFE45C), 0);
+  lv_obj_set_style_outline_opa(trashControl, active ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
+}
+
+void delete_workspace_chain(bitblocks::BlockId rootId) {
+  bitblocks::BlockId ids[kMaxWorkspaceBlocks];
+  uint8_t count = 0;
+  for(bitblocks::BlockId id = rootId; id != bitblocks::kInvalidBlockId && count < kMaxWorkspaceBlocks;) {
+    ids[count++] = id;
+    const bitblocks::BlockModel* model = workspaceModel.get(id);
+    if(model == nullptr) break;
+    id = model->next;
+  }
+  clear_selection();
+  workspaceModel.removeChain(rootId);
+  for(uint8_t i = 0; i < count; ++i) {
+    WorkspaceBlock* view = view_for(ids[i]);
+    if(view == nullptr) continue;
+    if(view->object != nullptr) lv_obj_delete_async(view->object);
+    *view = WorkspaceBlock{};
+  }
+  set_trash_active(false);
+}
+
 void workspace_local(const lv_point_t& point, int* x, int* y) {
   lv_area_t area;
   lv_obj_get_coords(workspace, &area);
@@ -345,6 +382,7 @@ void update_workspace_drag(const lv_point_t& point) {
   targetY = LV_CLAMP(2, targetY, kWorkspaceHeight - chainHeight - 2);
   workspaceModel.moveChain(interaction.blockId, targetX - model->x, targetY - model->y);
   sync_chain_views(interaction.blockId);
+  set_trash_active(inside_trash(point));
   interaction.lastPoint = point;
 }
 
@@ -366,7 +404,11 @@ void workspace_block_event(lv_event_t* event) {
   } else if(code == LV_EVENT_PRESSING) {
     update_workspace_drag(point);
   } else if(code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST) {
-    if(interaction.state == InteractionState::DraggingWorkspaceBlock) snap_stack(interaction.blockId);
+    if(interaction.state == InteractionState::DraggingWorkspaceBlock) {
+      if(inside_trash(point)) delete_workspace_chain(interaction.blockId);
+      else snap_stack(interaction.blockId);
+    }
+    set_trash_active(false);
     interaction = Interaction{};
   }
 }
@@ -402,6 +444,10 @@ void palette_pressed(lv_event_t* event) {
     return;
   }
   if(code == LV_EVENT_RELEASED || code == LV_EVENT_PRESS_LOST) {
+    if(interaction.state == InteractionState::DraggingPaletteClone && inside_trash(raw)) {
+      reset_interaction();
+      return;
+    }
     if(interaction.state == InteractionState::DraggingPaletteClone && inside_workspace(raw) &&
        interaction.paletteIndex >= 0 && interaction.paletteIndex < paletteSpecCount) {
       int localX, localY;
@@ -639,10 +685,18 @@ void BitBlocksApp::create() {
   workspace = panel(root, kWorkspaceX, kWorkspaceY, kWorkspaceWidth, kWorkspaceHeight, 0xFFFFFF, 0x34302D, 2);
   lv_obj_add_flag(workspace, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_add_event_cb(workspace, empty_space_pressed, LV_EVENT_PRESSED, nullptr);
-  playButton = panel(workspace, 194, 266, 28, 36, 0x4B843D, 0x171820, 3);
-  text(playButton, ">", 9, 7, &monogram_24, 0xFFFFFF);
-  stopButton = panel(workspace, 228, 266, 28, 36, 0xDF244B, 0x171820, 3);
-  text(stopButton, "[]", 6, 8, &monogram_20, 0xFFFFFF);
+  auto imageControl = [](int x, const lv_image_dsc_t* source) {
+    lv_obj_t* control = panel(workspace, x, 271, 34, 34, 0xFFFFFF, 0xFFFFFF, 0);
+    lv_obj_set_style_bg_opa(control, LV_OPA_TRANSP, 0);
+    lv_obj_t* image = lv_image_create(control);
+    lv_image_set_src(image, source);
+    lv_obj_set_pos(image, 1, 1);
+    lv_obj_clear_flag(image, LV_OBJ_FLAG_CLICKABLE);
+    return control;
+  };
+  trashControl = imageControl(157, &bitblocks_trash_icon);
+  playButton = imageControl(193, &bitblocks_play_icon);
+  stopButton = imageControl(229, &bitblocks_stop_icon);
 }
 
 void BitBlocksApp::destroy() {
@@ -654,6 +708,7 @@ void BitBlocksApp::destroy() {
   workspace = nullptr;
   playButton = nullptr;
   stopButton = nullptr;
+  trashControl = nullptr;
   selectedBlock = nullptr;
   selectedPaletteBlock = nullptr;
 }

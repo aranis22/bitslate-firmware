@@ -77,4 +77,15 @@ void WorkspaceModel::moveChain(BlockId root, int16_t dx, int16_t dy) {
   }
 }
 
+void WorkspaceModel::removeChain(BlockId root) {
+  detachPrevious(root);
+  for(BlockId id = root; id != kInvalidBlockId;) {
+    BlockModel* block = get(id);
+    if(block == nullptr) break;
+    const BlockId next = block->next;
+    *block = BlockModel{};
+    id = next;
+  }
+}
+
 }  // namespace bitblocks

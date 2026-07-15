@@ -29,6 +29,7 @@ class WorkspaceModel {
   bool chainContains(BlockId root, BlockId candidate) const;
   BlockId tail(BlockId root) const;
   void moveChain(BlockId root, int16_t dx, int16_t dy);
+  void removeChain(BlockId root);
 
  private:
   BlockModel blocks_[kMaxBlocks] = {};
