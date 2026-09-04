@@ -46,7 +46,7 @@ The long-term goal is a classroom set of inexpensive devices that can operate in
 
 ### Interactive world map
 
-![World map overview on BitSlate](docs/media/bitslate/world-map.jpg)
+<img src="docs/media/bitslate/world-map.jpg" alt="World map overview on BitSlate" width="420">
 
 The map prototype renders generated Natural Earth data locally with touch-based pan and zoom, labels, capitals, and optional grid detail. These interactions form the foundation for map exploration and geography activities.
 
@@ -64,9 +64,15 @@ The map prototype renders generated Natural Earth data locally with touch-based 
 
 ### Chess
 
-![Chess activity running on BitSlate](docs/media/bitslate/chess.jpg)
+<img src="docs/media/bitslate/chess.jpg" alt="Chess activity running on BitSlate" width="420">
 
 The current touch chess prototype supports local turn-taking and legal piece movement. Computer play and invitations to nearby BitSlate players are planned extensions.
+
+### Circuit Lab
+
+<img src="docs/media/bitslate/circuit-lab.jpg" alt="Circuit Lab running on BitSlate" width="420">
+
+**Circuit Lab** — A PhET-like interactive circuit laboratory running directly on BitSlate, designed for hands-on exploration of basic electrical concepts through a portable touchscreen interface.
 
 ## Applications
 
@@ -78,7 +84,7 @@ These are the leaf apps currently registered in `src/ui/navigation/app_registry.
 | World Map | Working prototype | Locally rendered world map with touch pan/zoom, labels, capitals, and grid controls. |
 | Masses / Springs | Working prototype | Hooke's-law simulation with gravity, damping, controls, and live displacement/force readouts. |
 | Collision | Working prototype | Two-body 1D elastic collision with adjustable mass and velocity plus momentum and energy readouts. |
-| Circuits | Working prototype | Battery, bulb, and wire placement with closed-loop detection and bulb state. |
+| Circuit Lab | Working prototype | Interactive PhET-like circuit lab for exploring basic electrical concepts and circuit behavior directly on the device. |
 | Periodic Table | Working prototype | Interactive 118-element grid and property panel. |
 | Atom Lab | Working prototype | Proton, neutron, and electron controls with derived element, mass, and charge. |
 | Graphing Calculator | Working prototype | Function plotting, value table, trace controls, and a compact expression parser. |
