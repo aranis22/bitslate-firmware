@@ -46,13 +46,9 @@ The long-term goal is a classroom set of inexpensive devices that can operate in
 
 ### Interactive world map
 
-| Map overview | Pan/zoom controls |
-| --- | --- |
-| ![World map overview on BitSlate](docs/media/bitslate/world-map.jpg) | ![World map controls on BitSlate](docs/media/bitslate/world-map-controls.jpg) |
+![World map overview on BitSlate](docs/media/bitslate/world-map.jpg)
 
 The map prototype renders generated Natural Earth data locally with touch-based pan and zoom, labels, capitals, and optional grid detail. These interactions form the foundation for map exploration and geography activities.
-
-> The supplied media directory contained a still photograph named `world map video.jpg`, not a video file. It is included above as an image; no video link is claimed.
 
 ### Learning applications on hardware
 
