@@ -44,29 +44,27 @@ The long-term goal is a classroom set of inexpensive devices that can operate in
 
 ## Demo and gallery
 
-### Interactive world map
-
-<img src="docs/media/bitslate/world-map.jpg" alt="World map overview on BitSlate" width="420">
-
-The map prototype renders generated Natural Earth data locally with touch-based pan and zoom, labels, capitals, and optional grid detail. These interactions form the foundation for map exploration and geography activities.
-
 ### Learning applications on hardware
+
+| Interactive World Map | Chess |
+| --- | --- |
+| <img src="docs/media/bitslate/world-map.jpg" alt="World map overview on BitSlate" width="360"> | <img src="docs/media/bitslate/chess.jpg" alt="Chess activity running on BitSlate" width="360"> |
+| Touch-based map exploration with pan and zoom, forming the foundation for geography exploration, map quizzes, and spatial learning activities. | A chess activity where students can play against the computer or invite another nearby BitSlate user for a local multiplayer game. |
 
 | Flags quiz | Build an Atom |
 | --- | --- |
-| ![World flags quiz on BitSlate](docs/media/bitslate/flags-quiz.jpg) | ![Build an Atom on BitSlate](docs/media/bitslate/build-an-atom.jpg) |
+| <img src="docs/media/bitslate/flags-quiz.jpg" alt="World flags quiz on BitSlate" width="360"> | <img src="docs/media/bitslate/build-an-atom.jpg" alt="Build an Atom on BitSlate" width="360"> |
 | Four-choice touch quiz using locally stored flag assets. | Particle controls update element identity, mass, and charge. |
 
 | Periodic table | Collision Lab |
 | --- | --- |
-| ![Interactive periodic table on BitSlate](docs/media/bitslate/periodic-table.jpg) | ![Collision Lab on BitSlate](docs/media/bitslate/collision-lab.jpg) |
+| <img src="docs/media/bitslate/periodic-table.jpg" alt="Interactive periodic table on BitSlate" width="360"> | <img src="docs/media/bitslate/collision-lab.jpg" alt="Collision Lab on BitSlate" width="360"> |
 | Tap an element to inspect its properties. | Adjust masses and velocities and observe a 1D elastic collision. |
 
-### Chess
-
-<img src="docs/media/bitslate/chess.jpg" alt="Chess activity running on BitSlate" width="420">
-
-The current touch chess prototype supports local turn-taking and legal piece movement. Computer play and invitations to nearby BitSlate players are planned extensions.
+| Optics Lab | Particle Lab |
+| --- | --- |
+| <img src="docs/media/bitslate/optics-lab.png" alt="Optics Lab running on BitSlate" width="360"> | <img src="docs/media/bitslate/particle-lab.png" alt="Particle Lab running on BitSlate" width="360"> |
+| A PhET-like interactive optics lab for exploring lenses, focal lengths, ray paths, magnification, and other geometric-optics concepts directly on BitSlate. | An interactive particle-physics sandbox for visualizing particle paths and experimenting with simple motion and physics concepts on the touchscreen. |
 
 ### Circuit Lab
 
