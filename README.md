@@ -62,13 +62,19 @@ The map prototype renders generated Natural Earth data locally with touch-based 
 | ![Interactive periodic table on BitSlate](docs/media/bitslate/periodic-table.jpg) | ![Collision Lab on BitSlate](docs/media/bitslate/collision-lab.jpg) |
 | Tap an element to inspect its properties. | Adjust masses and velocities and observe a 1D elastic collision. |
 
+### Chess
+
+![Chess activity running on BitSlate](docs/media/bitslate/chess.jpg)
+
+The current touch chess prototype supports local turn-taking and legal piece movement. Computer play and invitations to nearby BitSlate players are planned extensions.
+
 ## Applications
 
 These are the leaf apps currently registered in `src/ui/navigation/app_registry.cpp`.
 
 | App | Status | Description |
 | --- | --- | --- |
-| Chess | Working prototype | Touch chess with legal piece movement, captures, turns, and automatic queen promotion; advanced rules and AI are not implemented. |
+| Chess | Working prototype | A touch chess activity with legal piece movement, captures, turns, and automatic queen promotion. Inviting another BitSlate player locally and playing against the computer are planned; networking and AI are not implemented. |
 | World Map | Working prototype | Locally rendered world map with touch pan/zoom, labels, capitals, and grid controls. |
 | Masses / Springs | Working prototype | Hooke's-law simulation with gravity, damping, controls, and live displacement/force readouts. |
 | Collision | Working prototype | Two-body 1D elastic collision with adjustable mass and velocity plus momentum and energy readouts. |
@@ -147,14 +153,42 @@ See [`BITBLOCKS_PORT_SPEC.md`](BITBLOCKS_PORT_SPEC.md) for the device port contr
 
 ## Classroom networking
 
-The following is the planned classroom flow. The repository does not currently contain ESP-NOW transport or teacher/student workflow code.
+BitSlate is designed not only as a personal learning device but also as a locally interconnected classroom computer. The planned ESP-NOW layer will let students discover nearby BitSlates, connect, invite classmates into activities, exchange messages, and participate in shared learning experiences without internet access. This extends the peer-oriented classroom idea behind OLPC through inexpensive BitSlate hardware.
 
 ```mermaid
-flowchart LR
-    T[Teacher BitSlate] -. planned ESP-NOW .-> S[Student BitSlates]
-    T -. lessons · quizzes · challenges .-> S
-    S -. planned responses .-> T
+flowchart TB
+    T[Teacher BitSlate<br/>organizer / controller]
+    M[Planned local ESP-NOW classroom mesh<br/>connect · invite · chat · play activities]
+    T -. lessons · prompts · coordination .-> M
+
+    subgraph R1[Row 1]
+        direction LR
+        A[Maya] ~~~ B[Liam] ~~~ C[Sofia] ~~~ D[Noah]
+    end
+    subgraph R2[Row 2]
+        direction LR
+        E[Aisha] ~~~ F[Ethan] ~~~ G[Priya] ~~~ H[Mateo]
+    end
+    subgraph R3[Row 3]
+        direction LR
+        I[Chloe] ~~~ J[Lucas] ~~~ K[Amara] ~~~ L[Daniel]
+    end
+
+    M -. local interaction .-> A
+    M -.-> B
+    M -.-> C
+    M -.-> D
+    M -.-> E
+    M -.-> F
+    M -.-> G
+    M -.-> H
+    M -.-> I
+    M -.-> J
+    M -.-> K
+    M -.-> L
 ```
+
+The repository does not currently contain ESP-NOW transport, peer discovery, chat, invitations, multiplayer, or teacher/student workflow code. The diagram represents the intended 12-student classroom architecture.
 
 ## Hardware
 
