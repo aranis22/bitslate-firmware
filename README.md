@@ -8,11 +8,9 @@
 ![PlatformIO](https://img.shields.io/badge/Build-PlatformIO-F5822A?logo=platformio&logoColor=white)
 ![Prototype](https://img.shields.io/badge/Status-Prototype-F2C94C)
 
-BitSlate is a low-cost, offline-first portable educational computer built around the ESP32-S3. The project brings geography exploration, interactive science labs, calculators, coding tools, games, and other learning experiences into one compact touch device—similar in spirit to OLPC, but designed around inexpensive embedded hardware.
+BitSlate is a low-cost offline-first portable educational computer built around the ESP32-S3. It brings geography, interactive science, calculators, coding tools and games into one compact touch device. It is similar in spirit to OLPC but designed around inexpensive embedded hardware.
 
-BitSlate is still firmly in the prototype stage. Its core proof of concept—a touchscreen educational device with a modular launcher and a growing suite of applications running locally on the ESP32-S3—is working. Classroom networking, persistence, and production hardware remain future work.
-
-![BitSlate world map running on the hardware prototype](docs/media/bitslate/world-map.jpg)
+BitSlate is still firmly in the prototype stage. The core proof of concept is working: a touchscreen educational device with a modular launcher and a growing suite of applications running locally on the ESP32-S3. Classroom networking, persistence and production hardware remain future work.
 
 ## What is BitSlate?
 
@@ -128,7 +126,7 @@ flowchart TB
 
 ## BitBlocks
 
-BitBlocks is currently a frozen PySide6 desktop prototype and a port specification—not a connected firmware app. It demonstrates palette browsing, clone-on-drop blocks, workspace dragging, basic vertical snapping, linked stacks, zoom/pan, and sprite/backdrop selection. Play and Stop are visual controls only; there is no interpreter or generated-code runtime yet.
+BitBlocks is currently a frozen PySide6 desktop prototype and a port specification, not a connected firmware app. It demonstrates palette browsing, clone-on-drop blocks, workspace dragging, basic vertical snapping, linked stacks, zoom/pan, and sprite/backdrop selection. Play and Stop are visual controls only; there is no interpreter or generated-code runtime yet.
 
 ```mermaid
 flowchart LR
@@ -189,13 +187,13 @@ Full electrical notes are in [`docs/HARDWARE.md`](docs/HARDWARE.md).
 | TFT DC | 8 | Display data/command |
 | TFT RST | 3 | Display reset; strapping-sensitive prototype connection |
 | Touch CS | 7 | XPT2046 chip select |
-| Touch IRQ | — | Not connected (`-1`) |
+| Touch IRQ | N/A | Not connected (`-1`) |
 | Back / encoder press | 20 | Active-low, `INPUT_PULLUP` |
 | Left | 47 | Active-low, `INPUT_PULLUP` |
 | Right | 48 | Active-low, `INPUT_PULLUP` |
 | Graph encoder A | 38 | Used only by Graphing Calculator |
 | Graph encoder B | 39 | Used only by Graphing Calculator |
-| Backlight | — | Not GPIO-controlled; tied to 5 V |
+| Backlight | N/A | Not GPIO-controlled; tied to 5 V |
 
 > **Prototype hardware note:** GPIO3 is an ESP32-S3 strapping pin and is currently used for TFT reset. Avoid forcing an unintended level during reset. GPIO37 is reserved by the module's octal PSRAM interface and must not be used.
 
